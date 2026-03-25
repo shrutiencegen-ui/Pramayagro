@@ -21,7 +21,7 @@ import ContactUs from "./pages/Contact";
 import AdminProducts from "./pages/Admin/Products"; 
 import AddProduct from "./pages/Admin/AddProduct";
 import AdminLayout from "./pages/Admin/AdminLayout";
-
+import Hydroponics from "./pages/Hydroponics";
 function App() {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith("/admin");
@@ -38,6 +38,7 @@ function App() {
           <Route path="/products" element={<UserProducts />} /> 
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<ContactUs />} />
+          <Route path="/hydroponics" element={<Hydroponics />} />
 
           <Route
             path="/cart"

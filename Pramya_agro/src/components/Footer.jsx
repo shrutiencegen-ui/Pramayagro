@@ -6,7 +6,8 @@ export default function Footer() {
     { name: "Home", path: "/" },
     { name: "About", path: "/about" },
     { name: "Products", path: "/products" },
-    { name: "Smart Farming", path: "/smart-farming" },
+    { name: "Hydroponics", path: "/hydroponics" },
+    { name: "Blogs", path: "/blogs" },
     { name: "Contact", path: "/contact" },
   ];
 

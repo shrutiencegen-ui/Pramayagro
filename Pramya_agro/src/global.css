@@ -17,3 +17,10 @@ html, body {
   opacity: 1;
   transform: translateY(0);
 }
+html.light {
+  background-color: white;
+}
+
+html.dark {
+  background-color: #000;
+}

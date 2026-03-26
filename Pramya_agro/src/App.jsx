@@ -22,12 +22,15 @@ import AdminProducts from "./pages/Admin/Products";
 import AddProduct from "./pages/Admin/AddProduct";
 import AdminLayout from "./pages/Admin/AdminLayout";
 import Hydroponics from "./pages/Hydroponics";
+
+import { useTheme } from "./context/ThemeContext";
 function App() {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith("/admin");
+  const { theme } = useTheme();
 
   return (
-    <div className="bg-[#050707] text-white min-h-screen flex flex-col">
+   <div className="min-h-screen transition-colors duration-300">
       {!isAdminRoute && <Navbar />}
 
       <main className={`flex-1 ${!isAdminRoute ? "pt-24" : ""}`}>

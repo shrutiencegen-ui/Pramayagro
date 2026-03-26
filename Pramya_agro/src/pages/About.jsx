@@ -1,93 +1,205 @@
 "use client";
 
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
-import { Users, Leaf, Globe, Target } from "lucide-react";
+import { useTheme } from "../context/ThemeContext";
+import { Leaf, Globe, Target } from "lucide-react";
 
 export default function AboutUs() {
+  const { theme } = useTheme();
+
   const team = [
-    { name: "Shruti Jadhav", role: "Founder & CEO", image: "https://via.placeholder.com/150" },
-    { name: "Pramod Patil", role: "Head of Farming", image: "https://via.placeholder.com/150" },
-    { name: "Sneha Kulkarni", role: "Marketing Lead", image: "https://via.placeholder.com/150" },
-    { name: "Rohit Deshmukh", role: "Sustainability Officer", image: "https://via.placeholder.com/150" },
+    { name: "Pramod Patil", role: "Head of Farming", image: "" },
+    { name: "Sneha Kulkarni", role: "Marketing Lead", image: "" },
+    { name: "Rohit Deshmukh", role: "Sustainability Officer", image: "" },
   ];
 
+  const lightGlow =
+    "shadow-[0_0_15px_3px_rgba(16,185,129,0.35)] border-emerald-400";
+
   return (
-    <div className="bg-[#050707] text-white min-h-screen overflow-x-hidden">
-      <Navbar />
+    <div
+      className={`min-h-screen overflow-x-hidden transition-colors duration-500 ${
+        theme === "dark"
+          ? "bg-[#0b0f0d] text-gray-100"
+          : "bg-emerald-50 text-gray-900"
+      }`}
+    >
+      {/* HERO */}
+      <section className="relative h-[80vh] flex items-center justify-center text-center px-6">
+        <div className="absolute inset-0">
+          <img
+            src="https://images.unsplash.com/photo-1501004318641-b39e6451bec6"
+            className="w-full h-full object-cover"
+            alt=""
+          />
+          <div
+            className={`absolute inset-0 backdrop-blur-sm ${
+              theme === "dark" ? "bg-black/70" : "bg-white/40"
+            }`}
+          ></div>
+        </div>
 
-      {/* Hero Section */}
-      <section className="relative h-[60vh] flex items-center justify-center bg-cover bg-center" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=1770&q=80')" }}>
-        <div className="absolute inset-0 bg-black/60"></div>
-        <h1 className="relative text-5xl md:text-6xl font-extrabold text-emerald-400 text-center px-6">
-          About <span className="text-white">Pramay Agro</span>
-        </h1>
-      </section>
+        <div className="relative z-10 max-w-4xl">
+          <h1 className="text-5xl md:text-7xl font-extrabold leading-tight">
+            <span className="bg-gradient-to-r from-emerald-500 via-green-400 to-teal-400 bg-clip-text text-transparent">
+              Pramay Agro
+            </span>
+          </h1>
 
-      {/* Who We Are */}
-      <section className="max-w-7xl mx-auto px-6 py-24 text-center space-y-10">
-        <h2 className="text-4xl font-extrabold text-white">Who We Are</h2>
-        <p className="text-gray-300 max-w-3xl mx-auto text-lg">
-          Pramay Agro is a sustainable agriculture company committed to providing premium organic products, empowering farmers, and promoting eco-friendly farming solutions. Our mission is to nurture the earth while nourishing communities.
-        </p>
+          <p
+            className={`mt-6 text-lg md:text-xl ${
+              theme === "dark" ? "text-gray-300" : "text-gray-800"
+            }`}
+          >
+            Growing purity. Empowering farmers. Building a greener tomorrow.
+          </p>
 
-        {/* Mission/Vision/Values Cards */}
-        <div className="mt-16 grid sm:grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 p-8 rounded-3xl shadow-lg hover:scale-105 transition-transform duration-300">
-            <Leaf size={32} className="mx-auto text-white mb-4" />
-            <h3 className="text-2xl font-bold mb-2">Our Mission</h3>
-            <p className="text-gray-100">
-              Deliver high-quality organic produce while promoting sustainable farming and supporting local farmers.
-            </p>
-          </div>
-
-          <div className="bg-gradient-to-r from-indigo-500 to-indigo-600 p-8 rounded-3xl shadow-lg hover:scale-105 transition-transform duration-300">
-            <Target size={32} className="mx-auto text-white mb-4" />
-            <h3 className="text-2xl font-bold mb-2">Our Vision</h3>
-            <p className="text-gray-100">
-              To be a leader in eco-friendly agriculture, creating a greener planet and healthier communities.
-            </p>
-          </div>
-
-          <div className="bg-gradient-to-r from-pink-500 to-pink-600 p-8 rounded-3xl shadow-lg hover:scale-105 transition-transform duration-300">
-            <Globe size={32} className="mx-auto text-white mb-4" />
-            <h3 className="text-2xl font-bold mb-2">Our Values</h3>
-            <p className="text-gray-100">
-              Integrity, sustainability, community empowerment, and innovation in every step we take.
-            </p>
+          <div className="mt-10">
+            <a
+              href="/products"
+              className={`px-8 py-4 bg-gradient-to-r from-emerald-400 to-teal-400 text-black font-semibold rounded-full shadow-lg hover:scale-105 transition ${
+                theme === "light" ? lightGlow : ""
+              }`}
+            >
+              Explore Products
+            </a>
           </div>
         </div>
       </section>
 
-      {/* Team Section */}
-      <section className="bg-black/40 py-24">
-        <div className="max-w-7xl mx-auto px-6 text-center">
-          <h2 className="text-4xl font-extrabold text-white mb-12">Meet Our Team</h2>
+      {/* WHO WE ARE */}
+      <section
+        className={`max-w-6xl mx-auto px-6 py-24 text-center rounded-3xl transition-all duration-500 ${
+          theme === "light" ? " " : ""
+        }`}
+      >
+        <h2 className="text-4xl md:text-5xl font-bold mb-6">
+          Who We Are
+        </h2>
 
-          <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+        <p className="max-w-3xl mx-auto text-lg leading-relaxed">
+          Pramay Agro is more than just an agriculture company — we are a movement
+          towards sustainable living. We bridge the gap between farmers and consumers
+          by delivering pure organic produce while protecting nature.
+        </p>
+      </section>
+
+      {/* MISSION / VISION / VALUES */}
+      <section
+        className={`max-w-7xl mx-auto px-6 pb-24 grid md:grid-cols-3 gap-10 transition-all duration-500 ${
+          theme === "light" ? " " : ""
+        }`}
+      >
+        {[
+          {
+            title: "Mission",
+            icon: <Leaf size={36} />,
+            desc: "Deliver high-quality organic produce while supporting farmers.",
+          },
+          {
+            title: "Vision",
+            icon: <Target size={36} />,
+            desc: "Build a greener, healthier future through eco farming.",
+          },
+          {
+            title: "Values",
+            icon: <Globe size={36} />,
+            desc: "Integrity, sustainability, innovation & community.",
+          },
+        ].map((item, i) => (
+          <div
+            key={i}
+            className={`group rounded-3xl p-[1px] bg-gradient-to-br from-emerald-400/40 to-teal-400/20 transition-all duration-500 ${
+              theme === "light" ? lightGlow : ""
+            }`}
+          >
+            <div
+              className={`rounded-3xl p-8 h-full backdrop-blur-xl border shadow-md group-hover:-translate-y-2 transition-all duration-500 ${
+                theme === "dark"
+                  ? "bg-[#111314] border-white/10"
+                  : "bg-white border-gray-200"
+              }`}
+            >
+              <div className="text-emerald-500 mb-4">{item.icon}</div>
+
+              <h3 className="text-2xl font-bold mb-3">{item.title}</h3>
+
+              <p>{item.desc}</p>
+            </div>
+          </div>
+        ))}
+      </section>
+
+      {/* TEAM */}
+      <section className={`py-32 transition-all duration-500 ${theme === "light" ? lightGlow : ""}`}>
+        <div className="max-w-6xl mx-auto px-6 text-center">
+          <h2 className="text-3xl md:text-4xl font-semibold mb-20">
+            Meet the Team
+          </h2>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-16">
             {team.map((member, idx) => (
-              <div key={idx} className="bg-white/5 backdrop-blur-xl p-6 rounded-3xl hover:scale-105 transition-transform duration-300 shadow-lg">
-                <img src={member.image} alt={member.name} className="w-32 h-32 object-cover rounded-full mx-auto mb-4 border-2 border-emerald-400" />
-                <h3 className="text-xl font-bold mb-1">{member.name}</h3>
-                <p className="text-gray-400">{member.role}</p>
+              <div key={idx} className="group relative">
+                <div className="absolute -inset-2 rounded-3xl opacity-0 group-hover:opacity-100 blur-2xl bg-emerald-400/20 transition"></div>
+
+                <div className="relative rounded-3xl p-[1px] bg-gradient-to-br from-gray-200 to-transparent dark:from-white/10">
+                  <div
+                    className={`backdrop-blur-xl rounded-3xl p-8 text-center border shadow-sm group-hover:-translate-y-2 transition-all duration-500 ${
+                      theme === "dark"
+                        ? "bg-[#111314] border-white/10"
+                        : "bg-white border-gray-200"
+                    }`}
+                  >
+                    <div className="w-28 h-28 mx-auto mb-6 rounded-full overflow-hidden bg-gray-200 dark:bg-white/10 flex items-center justify-center text-gray-400 text-xs">
+                      {member.image ? (
+                        <img
+                          src={member.image}
+                          alt={member.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        "No Image"
+                      )}
+                    </div>
+
+                    <h3 className="text-lg font-semibold">{member.name}</h3>
+                    <p className="text-sm mt-1">{member.role}</p>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Call to Action */}
-      <section className="py-24 bg-emerald-500 text-black text-center rounded-t-3xl">
-        <h2 className="text-4xl font-extrabold mb-4">Join Us on Our Journey</h2>
-        <p className="max-w-2xl mx-auto mb-8">
-          Experience the best organic products and support sustainable agriculture. Let's grow a greener future together.
-        </p>
-        <a href="/products" className="inline-block px-8 py-4 bg-black text-emerald-500 font-bold rounded-2xl hover:bg-white hover:text-emerald-600 transition-all duration-300 shadow-lg">
-          Explore Products
-        </a>
-      </section>
+      {/* CTA */}
+      <section
+        className={`relative py-24 text-center transition-all duration-500  bg-gradient-to-r from-emerald-400 to-emerald-600" ${
+          theme === "light" ? lightGlow : ""
+        }`}
+      >
+        <div
+          className={`absolute inset-0 blur-2xl ${
+            theme === "dark" ? "bg-emerald-900/20" : "bg-emerald-100/40"
+          }`}
+        ></div>
 
-   
+        <div className="relative z-10 max-w-3xl mx-auto px-6 ">
+          <h2 className="text-4xl md:text-5xl font-bold mb-6 ">
+            Join Our Journey
+          </h2>
+
+          <p className="mb-10">
+            Be part of a sustainable future. Support farmers. Choose organic.
+          </p>
+
+          <a
+            href="/products"
+            className="px-10 py-4 bg-gradient-to-r from-emerald-400 to-teal-400 text-black font-semibold rounded-full shadow-lg hover:scale-110 transition"
+          >
+            Get Started
+          </a>
+        </div>
+      </section>
     </div>
   );
 }

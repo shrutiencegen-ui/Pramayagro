@@ -100,7 +100,7 @@ export default function Login() {
 
   return (
 
-    <div className="min-h-screen flex items-center justify-center bg-[#050707] text-white px-6">
+    <div className="min-h-screen flex items-center justify-center dark:bg-[#050707] bg-white] text-white px-6">
 
       <form
         onSubmit={handleSubmit}

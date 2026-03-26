@@ -12,7 +12,7 @@ export default function Footer() {
   ];
 
   return (
-    <footer className="relative bg-[#050707] text-gray-300 pt-20 pb-10 border-t border-white/5 overflow-hidden">
+    <footer className="relative dark:bg-[#050707] bg-white] text-gray-300 pt-20 pb-10 border-t border-white/5 overflow-hidden">
 
       {/* Glow Background */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[300px] bg-emerald-600/10 blur-[140px] rounded-full pointer-events-none" />

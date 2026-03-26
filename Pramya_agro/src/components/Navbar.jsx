@@ -1,25 +1,25 @@
+"use client";
+
 import { useState, useEffect } from "react";
-import { ShoppingCart, User, Search, Sun, Moon } from "lucide-react";
-import { Link, NavLink } from "react-router-dom";
+import { ShoppingCart, User, Search, Sun, Moon, LogOut } from "lucide-react";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import API from "../services/api";
 import { useTheme } from "../context/ThemeContext";
-
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const { user, logout } = useAuth();
   const [cartCount, setCartCount] = useState(0);
   const { theme, toggleTheme } = useTheme();
+  const navigate = useNavigate();
 
-  // Scroll effect
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Fetch cart count
   const fetchCartCount = async () => {
     const token = localStorage.getItem("token");
     if (!token) return setCartCount(0);
@@ -37,105 +37,106 @@ export default function Navbar() {
     return () => clearInterval(interval);
   }, []);
 
-  useEffect(() => {
-    const handleStorage = (e) => {
-      if (e.key === "cartUpdated") fetchCartCount();
-    };
-    window.addEventListener("storage", handleStorage);
-    return () => window.removeEventListener("storage", handleStorage);
-  }, []);
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
 
   return (
     <nav
-      className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 bg-white dark:bg-black backdrop-blur-md ${
-        scrolled ? "shadow-2xl bg-opacity-90" : "shadow-none bg-opacity-100"
+      className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
+        scrolled
+          ? "bg-emerald-50/80 dark:bg-[#0b0f0d]/90 shadow-md backdrop-blur-md border-b border-emerald-100/50"
+          : "bg-emerald-50 dark:bg-[#0b0f0d] border-b border-emerald-200/30"
       }`}
     >
       <div className="max-w-7xl mx-auto px-6">
-        {/* TOP ROW */}
-        <div className="flex items-center justify-between py-4 gap-8">
+        <div className="flex items-center justify-between py-4 gap-6">
+
           {/* LOGO */}
           <Link to="/" className="flex items-center gap-3 flex-shrink-0 group">
-            <img
-              src="/logo.png"
-              alt="Pramay Agro Logo"
-              className="h-10 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
-            />
-            <h1 className="text-xl font-black tracking-tighter text-black dark:text-white">
+            <img src="/logo.png" alt="Logo" className="h-10 w-auto" />
+            <h1 className="text-xl font-black tracking-tighter text-gray-900 dark:text-white">
               PRAMAY<span className="text-emerald-500">AGRO</span>
             </h1>
           </Link>
 
-          {/* SEARCH */}
+          {/* SEARCH BAR */}
           <div className="hidden md:flex flex-1 max-w-2xl relative items-center">
             <input
               type="text"
-              placeholder="Search organic seeds..."
-              className="w-full bg-gray-100 dark:bg-white/5 border border-gray-300 dark:border-white/10 rounded-full py-2.5 px-10 focus:outline-none focus:border-emerald-500 text-sm text-black dark:text-gray-200"
+              placeholder="Search products..."
+              className="w-full bg-white dark:bg-[#111314] border border-gray-200 dark:border-gray-700 rounded-full py-2 px-10 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 shadow-sm focus:ring-1 focus:ring-emerald-400 transition"
             />
-            <Search className="absolute left-4 text-gray-500 dark:text-gray-400" size={16} />
+            <Search className="absolute left-4 text-gray-400 dark:text-gray-500" size={16} />
           </div>
 
-          {/* RIGHT SECTION */}
-          <div className="flex items-center gap-6">
-            {/* USER */}
-            <div className="flex items-center gap-3 group">
-              <User className="text-gray-600 dark:text-gray-300 group-hover:text-emerald-400" size={24} />
-              <div className="hidden lg:flex flex-col">
-                <span className="text-[10px] text-gray-500 dark:text-gray-400 uppercase font-bold">
-                  {user ? "Welcome" : "Account"}
-                </span>
-                {user ? (
-                  <div className="flex items-center gap-3">
-                    <span className="text-sm font-bold text-emerald-500 uppercase">{user.name}</span>
-                    <button
-                      onClick={logout}
-                      className="text-sm font-bold text-black dark:text-white hover:text-emerald-400 transition"
-                    >
-                      Logout
-                    </button>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-3">
-                    <Link
-                      to="/login"
-                      className="text-sm font-bold text-black dark:text-white hover:text-emerald-400 transition"
-                    >
-                      Login
-                    </Link>
-                    <Link
-                      to="/register"
-                      className="text-sm font-bold text-emerald-500 border border-emerald-500 px-3 py-1 rounded-full hover:bg-emerald-500 hover:text-black dark:hover:text-white transition"
-                    >
-                      Register
-                    </Link>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* CART */}
-            <Link to="/cart" className="relative group flex items-center">
-              <ShoppingCart className="text-black dark:text-white group-hover:text-emerald-400" size={24} />
-              {cartCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-emerald-500 text-black text-[10px] font-black h-4 w-4 rounded-full flex items-center justify-center border-2 border-white dark:border-black">
-                  {cartCount}
-                </span>
-              )}
-            </Link>
+          {/* ACTION BUTTONS */}
+          <div className="flex items-center gap-4">
 
             {/* THEME TOGGLE */}
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-full bg-gray-200 dark:bg-white/10 hover:bg-gray-300 dark:hover:bg-white/20 transition"
+              className="p-2 rounded-full bg-emerald-100/70 dark:bg-emerald-900/50 text-emerald-600 dark:text-yellow-400 hover:bg-emerald-200/80 dark:hover:bg-emerald-800/60 transition"
             >
-              {theme === "dark" ? <Sun className="text-yellow-400" size={18} /> : <Moon className="text-gray-800" size={18} />}
+              {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
             </button>
+
+            {/* USER PROFILE */}
+            <div className="flex items-center gap-3 border-l border-emerald-200 dark:border-emerald-700 pl-4">
+              <User className="text-gray-700 dark:text-gray-300" size={20} />
+              <div className="hidden lg:flex flex-col">
+                <span className="text-[9px] text-gray-400 uppercase font-bold">Account</span>
+                <div className="flex gap-2 items-center">
+                  {user ? (
+                    <>
+                      <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
+                        {user.name}
+                      </span>
+                      <button
+                        onClick={handleLogout}
+                        className="text-xs font-bold text-red-500 dark:text-red-400 hover:text-red-600 dark:hover:text-red-300 transition flex items-center gap-1"
+                      >
+                        <LogOut size={14} /> Logout
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <Link
+                        to="/login"
+                        className="text-xs font-bold text-gray-900 dark:text-white hover:text-emerald-500 transition"
+                      >
+                        Login
+                      </Link>
+                      <Link
+                        to="/signup"
+                        className="text-xs font-bold text-gray-900 dark:text-white hover:text-emerald-500 transition"
+                      >
+                        / Signup
+                      </Link>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* CART ICON */}
+            <Link
+              to="/cart"
+              className="relative p-2 text-gray-900 dark:text-white hover:text-emerald-500 transition"
+            >
+              <ShoppingCart size={22} />
+              {cartCount > 0 && (
+                <span className="absolute top-0 right-0 bg-emerald-500 text-white text-[10px] font-bold h-4 w-4 rounded-full flex items-center justify-center">
+                  {cartCount}
+                </span>
+              )}
+            </Link>
           </div>
         </div>
 
-        {/* BOTTOM MENU */}
-        <div className="flex items-center gap-8 pb-3 overflow-x-auto border-t border-gray-200 dark:border-white/10 pt-3">
+        {/* BOTTOM NAV LINKS */}
+        <div className="flex items-center gap-8 pb-3 overflow-x-auto border-t border-emerald-100/30 dark:border-emerald-700/40 pt-3">
           {[
             { to: "/", label: "Home" },
             { to: "/about", label: "About Us" },
@@ -143,33 +144,21 @@ export default function Navbar() {
             { to: "/hydroponics", label: "Hydroponics" },
             { to: "/blogs", label: "Blogs" },
             { to: "/contact", label: "Contact" },
-           
           ].map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
               className={({ isActive }) =>
-                `text-[11px] font-bold uppercase tracking-[1.5px] ${
-                  isActive ? "text-emerald-500" : "text-gray-600 dark:text-gray-400"
+                `text-[11px] font-bold uppercase tracking-[1px] transition-all ${
+                  isActive
+                    ? "text-emerald-500"
+                    : "text-gray-500 dark:text-gray-400 hover:text-emerald-500"
                 }`
               }
             >
               {item.label}
             </NavLink>
           ))}
-
-          {user?.role === "admin" && (
-            <NavLink
-              to="/admin"
-              className={({ isActive }) =>
-                `text-[11px] font-bold uppercase tracking-[1.5px] ${
-                  isActive ? "text-emerald-500" : "text-red-500 dark:text-red-400"
-                }`
-              }
-            >
-              Admin
-            </NavLink>
-          )}
         </div>
       </div>
     </nav>

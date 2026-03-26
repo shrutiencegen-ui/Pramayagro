@@ -1,13 +1,7 @@
-import { Link } from "react-router-dom";
-import {
-  Sprout,
-  Globe,
-  User,
-  Zap,
-  ShieldCheck,
-  ArrowRight,
-} from "lucide-react";
+"use client";
 
+import { Link } from "react-router-dom";
+import { Leaf, Globe, User, Droplet, Sparkles, ArrowRight, ShoppingBag } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, EffectFade, Pagination } from "swiper/modules";
 import CountUp from "react-countup";
@@ -16,11 +10,15 @@ import "swiper/css";
 import "swiper/css/effect-fade";
 import "swiper/css/pagination";
 import { useState, useEffect } from "react";
-import home from "../assets/home1.png";
+import { useTheme } from "../context/ThemeContext";
+
+import home1 from "../assets/home1.png";
 import home2 from "../assets/home2.png";
 import home3 from "../assets/home3.png";
+
 export default function Home() {
   const [featuredProducts, setFeaturedProducts] = useState([]);
+  const { theme } = useTheme();
 
   useEffect(() => {
     const fetchFeaturedProducts = async () => {
@@ -31,203 +29,218 @@ export default function Home() {
         console.error("Failed to fetch featured products", err);
       }
     };
-
     fetchFeaturedProducts();
   }, []);
 
   return (
-    <div className="relative bg-[#030504] text-white overflow-x-hidden">
-
-      {/* BACKGROUND GLOW */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-[-200px] left-1/2 -translate-x-1/2 w-[600px] md:w-[900px] h-[600px] md:h-[900px] bg-emerald-600/20 blur-[160px] md:blur-[220px] rounded-full"></div>
-        <div className="absolute bottom-[-100px] right-[-100px] w-[400px] md:w-[700px] h-[400px] md:h-[700px] bg-blue-600/10 blur-[140px] md:blur-[200px] rounded-full"></div>
-      </div>
-
-      {/* HERO */}
-     <section className="relative h-[100vh] w-full overflow-hidden">
-
-  {/* SLIDER */}
-  <Swiper
-    modules={[Autoplay, EffectFade, Pagination]}
-    effect="fade"
-    autoplay={{ delay: 4000 }}
-    pagination={{ clickable: true }}
-    loop
-    className="absolute inset-0 w-full h-full"
-  >
-    {[
-      home,home2,home3
-    ].map((img, i) => (
-      <SwiperSlide key={i}>
-        <div className="relative w-full h-full">
-
-          {/* IMAGE */}
-          <img
-            src={img}
-            alt="Organic Farm"
-            className="w-full h-full object-cover scale-125 md:scale-110"
-          />
-
-          {/* DARK OVERLAY */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/50 to-black/80" />
-
-        </div>
-      </SwiperSlide>
-    ))}
-  </Swiper>
-
-  {/* CONTENT ON IMAGE */}
-  <div className="absolute inset-0 z-10 flex items-center justify-center px-4">
-
-    <div className="max-w-3xl text-center space-y-6 md:space-y-10">
-     <div className="bg-black/30 backdrop-blur-md px-6 py-6 rounded-2xl border border-white/10">
-           {/* TAG */}
-      <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur border border-white/20 text-emerald-400 text-xs font-bold uppercase">
-        <Sprout size={14} /> 100% Organic Technology
-      </div>
-
-      {/* HEADING */}
-      <h1 className="text-4xl sm:text-5xl md:text-7xl font-extrabold leading-tight 
-drop-shadow-[0_8px_30px_rgba(0,0,0,0.9)]">
-        <span className="block text-white/90">PURE SOIL.</span>
-        <span className="block bg-gradient-to-r from-emerald-300 via-emerald-500 to-emerald-700 bg-clip-text text-transparent">
-          SMART YIELD.
-        </span>
-      </h1>
-
-      {/* DESC */}
-      <p className="text-sm sm:text-base md:text-lg text-gray-200 
-drop-shadow-[0_4px_20px_rgba(0,0,0,0.9)]">
-        Premium organic produce powered by intelligent farming.
-      </p>
-
-      {/* BUTTONS */}
-      <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-
-        <Link to="/products">
-          <button className="px-6 py-3 md:px-8 md:py-4 bg-emerald-500 text-black font-bold text-xs md:text-sm rounded-full uppercase tracking-widest hover:bg-emerald-400 transition flex items-center justify-center gap-2">
-            Explore Shop <ArrowRight size={16} />
-          </button>
-        </Link>
-
-        <Link to="/about">
-          <button className="px-6 py-3 md:px-8 md:py-4 border border-white/30 rounded-full text-xs md:text-sm font-bold uppercase hover:bg-white/10 transition">
-            Our Story
-          </button>
-        </Link>
-
-      </div>
-      </div>
-
-  
-
-    </div>
-
-  </div>
-
-</section>
-
-      {/* STATS */}
-      <section className="py-16 md:py-24 border-y border-white/5 bg-black/40 backdrop-blur">
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 grid grid-cols-2 md:grid-cols-4 gap-10 md:gap-16">
-
-          {[
-            { label: "Global Export", value: 24, suffix: "+", icon: <Globe size={20} /> },
-            { label: "Happy Farmers", value: 15000, suffix: "+", icon: <User size={20} /> },
-            { label: "Smart Tech", value: 100, suffix: "%", icon: <Zap size={20} /> },
-            { label: "Certified Grade", value: 100, suffix: "%", icon: <ShieldCheck size={20} /> },
-          ].map((stat, i) => (
-            <div key={i} className="text-center">
-
-              <div className="w-12 h-12 md:w-14 md:h-14 mx-auto flex items-center justify-center text-emerald-400 bg-white/5 rounded-xl mb-4">
-                {stat.icon}
+    <div
+      className={`relative transition-colors duration-700 selection:bg-green-400 selection:text-white
+      ${theme === "dark" ? "bg-[#020403] text-white" : "bg-[#FAF6F0] text-gray-900"}`}
+    >
+      {/* HERO SECTION */}
+      <section className="relative h-[100vh] w-full overflow-hidden">
+        <Swiper
+          modules={[Autoplay, EffectFade, Pagination]}
+          effect="fade"
+          autoplay={{ delay: 5000 }}
+          loop
+          className="absolute inset-0 w-full h-full"
+        >
+          {[home1, home2, home3].map((img, i) => (
+            <SwiperSlide key={i}>
+              <div className="relative w-full h-full overflow-hidden">
+                <img
+                  src={img}
+                  alt="Organic Farm"
+                  className="w-full h-full object-cover scale-110 animate-pulse-slow"
+                />
+                <div
+                  className={`absolute inset-0 transition-colors duration-500
+                  ${theme === "dark" ? "bg-[#020403]/90" : "bg-black/30"}`}
+                />
               </div>
-
-              <h3 className="text-2xl md:text-4xl font-extrabold">
-                <CountUp end={stat.value} duration={3} suffix={stat.suffix} />
-              </h3>
-
-              <p className="text-[10px] md:text-xs text-gray-500 uppercase tracking-widest">
-                {stat.label}
-              </p>
-
-            </div>
+            </SwiperSlide>
           ))}
+        </Swiper>
 
+        <div className="absolute inset-0 z-10 flex flex-col justify-center px-6 md:px-24">
+          <div className="max-w-4xl space-y-6">
+            <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-green-400/20 backdrop-blur-xl border border-green-300/30 text-green-600 text-xs font-black uppercase tracking-[3px] animate-bounce-subtle">
+              <Sparkles size={14} /> 100% Organic & Fresh
+            </div>
+
+            <h1 className="text-6xl md:text-9xl font-black leading-[0.9] tracking-tighter">
+              <span className="text-white drop-shadow-2xl">FROM SOIL</span>
+              <br />
+              <span className="bg-gradient-to-r from-green-400 via-emerald-400 to-teal-400 bg-clip-text text-transparent">
+                TO SOUL.
+              </span>
+            </h1>
+
+            <p
+              className={`text-lg md:text-2xl max-w-2xl font-medium leading-relaxed
+              ${theme === "dark" ? "text-gray-300" : "text-gray-700"}`}
+            >
+              Pramay Agro brings sustainable, chemical-free farming directly to your table. Healthy food, happy planet.
+            </p>
+
+            <div className="flex flex-wrap gap-6 pt-4">
+              <Link to="/products">
+                <button className="px-10 py-5 bg-green-500 text-white font-black rounded-full uppercase text-xs tracking-widest hover:bg-green-600 hover:scale-110 transition-all shadow-[0_0_50px_rgba(72,187,120,0.5)] flex items-center gap-3">
+                  Start Shopping <ArrowRight size={20} />
+                </button>
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 animate-bounce">
+          <div className="w-1 h-12 bg-gradient-to-b from-green-400 to-transparent rounded-full" />
         </div>
       </section>
 
-      {/* WHY CHOOSE */}
-      <section className="py-20 md:py-28">
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center space-y-12 md:space-y-16">
-
-          <h2 className="text-3xl md:text-5xl font-bold">
-            Why Choose <span className="text-emerald-500">Pramaya?</span>
-          </h2>
-
-          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-10">
-
-            {[
-              {
-                title: "Sustainable Farming",
-                desc: "Eco-friendly practices that nurture soil health.",
-              },
-              {
-                title: "Smart Technology",
-                desc: "Modern insights to maximize crop yield.",
-              },
-              {
-                title: "Premium Quality",
-                desc: "Organic products meeting global standards.",
-              },
-            ].map((item, i) => (
-              <div
-                key={i}
-                className="p-6 md:p-10 bg-white/5 backdrop-blur rounded-2xl border border-white/10 hover:border-emerald-500/40 hover:scale-105 transition"
-              >
-                <h3 className="text-lg md:text-xl font-bold mb-3 text-emerald-400">
-                  {item.title}
-                </h3>
-                <p className="text-sm text-gray-400">{item.desc}</p>
+      {/* STATS SECTION */}
+      <section className="relative z-30 -mt-16 px-4 md:px-10">
+        <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6">
+          {[
+            { label: "Global Reach", value: 24, suffix: "+", icon: <Globe size={24} /> },
+            { label: "Farmers Supported", value: 15000, suffix: "+", icon: <User size={24} /> },
+            { label: "Water Saved", value: 50000, suffix: "L+", icon: <Droplet size={24} /> },
+            { label: "Soil Regenerated", value: 100, suffix: "%", icon: <Leaf size={24} /> },
+          ].map((stat, i) => (
+            <div
+              key={i}
+              className={`group relative p-8 rounded-[2.5rem] shadow-2xl border transition-all hover:-translate-y-3
+              ${theme === "dark"
+                ? "bg-zinc-900/90 border-white/10 hover:shadow-green-500/30"
+                : "bg-white/95 border-slate-100 hover:shadow-green-400/30"
+              } backdrop-blur-2xl`}
+            >
+              <div className="w-14 h-14 flex items-center justify-center text-green-500 bg-green-500/10 rounded-2xl mb-6 group-hover:bg-green-500 group-hover:text-white transition-all">
+                {stat.icon}
               </div>
-            ))}
+              <h3 className="text-4xl md:text-6xl font-black tracking-tighter">
+                <CountUp end={stat.value} duration={3} suffix={stat.suffix} />
+              </h3>
+              <p
+                className={`text-xs font-bold uppercase tracking-widest mt-2
+                ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}
+              >
+                {stat.label}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
 
+      {/* BENTO GRID / WHY PRAMAYA */}
+      <section className="py-32 px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col md:flex-row justify-between items-end mb-20 gap-6">
+            <div className="space-y-4">
+              <h2 className="text-5xl md:text-8xl font-black tracking-tighter leading-none">
+                WHY <span className="text-green-500">CHOOSE US?</span>
+              </h2>
+              <p className={`font-bold uppercase tracking-widest text-sm 
+                ${theme === "dark" ? "text-gray-400" : "text-gray-600"}`}>
+                Bringing nature to your table.
+              </p>
+            </div>
           </div>
 
+          <div className="grid md:grid-cols-3 gap-8">
+
+            {/* Large Card */}
+            <div className={`md:col-span-2 p-12 rounded-[3rem] relative overflow-hidden group shadow-2xl transition-all
+              ${theme === "dark" ? "bg-gradient-to-tr from-green-700 to-teal-800 text-white" : "bg-gradient-to-tr from-green-400 to-emerald-400 text-white"}`}>
+              <Leaf className="absolute -right-10 -bottom-10 text-white/10 scale-[5]" />
+              <h3 className="text-4xl font-black mb-6">Sustainable by Nature</h3>
+              <p className="text-lg font-bold opacity-90 max-w-md">
+                Every product supports regenerative farming and a healthier planet.
+              </p>
+              <div className="mt-10 w-20 h-2 bg-white rounded-full" />
+            </div>
+
+            {/* Small Cards */}
+            <div className={`p-10 rounded-[3rem] shadow-xl transition-transform hover:-translate-y-2
+              ${theme === "dark" ? "bg-zinc-900 border-white/10 text-gray-300" : "bg-white border-gray-200 text-gray-900"} border`}>
+              <h3 className="text-2xl font-black mb-4 text-green-500">Smart Farming</h3>
+              <p className="text-sm leading-relaxed font-medium">
+                IoT sensors track water usage, growth, and yield to optimize organic farming sustainably.
+              </p>
+            </div>
+
+            <div className={`p-10 rounded-[3rem] shadow-2xl transition-all relative overflow-hidden
+              ${theme === "dark" ? "bg-green-800 text-white" : "bg-green-700 text-white"}`}>
+              <div className="absolute inset-0 bg-green-500/10 group-hover:bg-green-500/20 transition-all rounded-[3rem]" />
+              <h3 className="text-2xl font-black relative z-10">100% Traceable</h3>
+              <p className="text-sm font-medium mt-4 relative z-10">
+                Scan any product to see the farm, farmer, and harvest date.
+              </p>
+              <div className="mt-8 flex gap-2 relative z-10">
+                <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse" />
+                <span className="text-[10px] font-black uppercase tracking-widest">Live Updates</span>
+              </div>
+            </div>
+
+          </div>
         </div>
       </section>
 
       {/* FEATURED PRODUCTS */}
-      <section className="py-20 md:py-28 bg-gradient-to-b from-transparent to-emerald-950/20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+      <section className={`py-24 md:py-32 transition-colors duration-500 rounded-[3rem] md:rounded-[5rem] mx-4 md:mx-10 border shadow-inner
+        ${theme === "dark" ? "bg-emerald-950/5 border-white/10" : "bg-[#f7f2eb] border-gray-200"}`}>
+        <div className="max-w-7xl mx-auto px-6">
 
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10 md:mb-16 gap-4">
-            <h2 className="text-3xl md:text-5xl font-bold">
-              Featured <span className="text-emerald-500">Products</span>
-            </h2>
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 gap-6">
+            <div className="space-y-3">
+              <h2 className="text-4xl md:text-6xl font-black tracking-tighter leading-none z-10 relative">
+                FEATURED<br/>
+                <span className="text-green-500">PRODUCTS</span>
+              </h2>
+              <div className="h-1.5 w-24 bg-green-500 rounded-full"></div>
+            </div>
 
-            <Link to="/products" className="text-emerald-400 font-bold flex items-center gap-2">
-              View All <ArrowRight size={18} />
+            <Link to="/products" className="group flex-shrink-0">
+              <button className={`flex items-center gap-2.5 px-6 py-3.5 rounded-2xl shadow-sm transition-all duration-300
+                ${theme === "dark" ? "bg-zinc-900 border border-white/10 text-green-400 hover:shadow-green-500/20" 
+                  : "bg-white border border-gray-200 text-green-600 hover:shadow-green-400/30"}`}>
+                View All Products
+                <ArrowRight size={18} className="group-hover:translate-x-1.5 transition-transform" />
+              </button>
             </Link>
           </div>
 
-          <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 md:gap-10">
             {featuredProducts.map((product) => (
-              <div
-                key={product.id}
-                className="group bg-white/5 rounded-2xl overflow-hidden border border-white/10 hover:border-emerald-500 transition"
-              >
-                <img
-                  src={product.image || "https://via.placeholder.com/300"}
-                  alt={product.name}
-                  className="h-40 md:h-48 w-full object-cover group-hover:scale-110 transition"
-                />
-                <div className="p-4 md:p-6">
-                  <h3 className="font-semibold text-sm md:text-base">{product.name}</h3>
-                  <p className="text-emerald-400 font-bold">{product.price}</p>
+              <div key={product.id} className={`group relative p-5 rounded-[2.5rem] overflow-hidden border transition-all duration-500 shadow-xl hover:-translate-y-3 hover:shadow-green-500/20
+                ${theme === "dark" ? "bg-zinc-950 border-white/10" : "bg-white border-gray-200"}`}>
+                <div className="h-60 rounded-[2rem] overflow-hidden relative mb-6">
+                  <img
+                    src={product.image || "https://via.placeholder.com/300"}
+                    alt={product.name}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                  />
+                  <div className="absolute inset-0 bg-black/5 group-hover:bg-transparent transition-colors" />
+                </div>
+
+                <div className="px-3 pb-3">
+                  <h3 className={`font-extrabold text-lg md:text-xl mb-2 transition-colors
+                    ${theme === "dark" ? "text-white group-hover:text-green-500" : "text-gray-800 group-hover:text-green-500"}`}>
+                    {product.name}
+                  </h3>
+                  <div className="flex justify-between items-end mt-4">
+                    <span className={`text-3xl font-black transition-colors
+                      ${theme === "dark" ? "text-green-400" : "text-green-600"}`}>
+                      ₹{product.price}
+                    </span>
+                    <Link to={`/products/${product.id}`} className="group-hover:scale-110 transition-transform">
+                      <button className={`p-3 rounded-full transition-colors
+                        ${theme === "dark" ? "bg-white/10 text-green-400 hover:bg-green-500 hover:text-white" : "bg-gray-100 text-gray-700 hover:bg-green-500 hover:text-white"}`}>
+                        <ShoppingBag size={18}/>
+                      </button>
+                    </Link>
+                  </div>
                 </div>
               </div>
             ))}
@@ -236,23 +249,23 @@ drop-shadow-[0_4px_20px_rgba(0,0,0,0.9)]">
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="py-20 md:py-28 text-center px-4">
-
-        <h2 className="text-3xl md:text-5xl font-bold mb-4 md:mb-6">
-          Start Your Organic Journey
-        </h2>
-
-        <p className="text-gray-400 mb-8 md:mb-10 text-sm md:text-base">
-          Join thousands choosing sustainable food.
-        </p>
-
-        <Link to="/signup">
-          <button className="px-8 py-3 md:px-10 md:py-4 bg-emerald-500 text-black rounded-full font-bold hover:bg-emerald-400 transition">
-            Get Started
-          </button>
-        </Link>
-
+      {/* CTA SECTION */}
+      <section className="py-40 relative px-6 text-center">
+        <div className={`max-w-5xl mx-auto rounded-[4rem] py-24 relative overflow-hidden shadow-[0_50px_100px_rgba(0,0,0,0.4)]
+          ${theme === "dark" ? "bg-green-800 text-white" : "bg-green-700 text-white"}`}>
+          <div className="absolute top-0 right-0 w-96 h-96 bg-green-400/10 blur-[100px] rounded-full" />
+          <h2 className="text-5xl md:text-8xl font-black tracking-tighter mb-8 px-4">
+            JOIN THE <span className="text-green-300">ORGANIC REVOLUTION</span>
+          </h2>
+          <p className="text-gray-200 text-lg md:text-xl max-w-2xl mx-auto mb-12 font-medium">
+            15,000+ people have already chosen chemical-free, healthy products. What are you waiting for?
+          </p>
+          <Link to="/signup">
+            <button className="px-14 py-6 bg-green-400 text-white font-black rounded-full uppercase tracking-widest text-sm hover:bg-green-500 transition-all shadow-xl">
+              Get Access Now
+            </button>
+          </Link>
+        </div>
       </section>
 
     </div>

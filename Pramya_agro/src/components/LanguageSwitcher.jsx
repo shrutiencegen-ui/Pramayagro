@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 
 export default function LanguageSwitcher() {
@@ -21,6 +23,15 @@ export default function LanguageSwitcher() {
     };
   }, []);
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const banner = document.querySelector(".goog-te-banner-frame");
+      if (banner) banner.style.display = "none";
+      document.body.style.top = "0px";
+    }, 500);
+    return () => clearInterval(interval);
+  }, []);
+
   const changeLanguage = (lang) => {
     setActive(lang);
     const select = document.querySelector(".goog-te-combo");
@@ -31,28 +42,34 @@ export default function LanguageSwitcher() {
   };
 
   return (
-    <div className="flex items-center gap-2">
-
+    <div className="relative inline-block text-left">
       {/* hidden google */}
       <div id="google_translate_element" style={{ display: "none" }} />
 
-      {[
-        { code: "en", label: "EN" },
-        { code: "hi", label: "HI" },
-        { code: "mr", label: "MR" },
-      ].map((lng) => (
-        <button
-          key={lng.code}
-          onClick={() => changeLanguage(lng.code)}
-          className={`px-3 py-1 text-xs font-bold rounded-full transition-all ${
-            active === lng.code
-              ? "bg-emerald-500 text-black shadow-md"
-              : "border border-white/20 text-gray-300 hover:bg-emerald-500 hover:text-black"
-          }`}
+      <button
+        className="inline-flex justify-between items-center w-24 px-4 py-2 bg-emerald-500 text-black font-semibold rounded-lg shadow-md hover:bg-emerald-600 focus:outline-none"
+        onClick={() => setActive((prev) => prev)} // toggle handled by select
+      >
+        {active.toUpperCase()}
+        <svg
+          className="ml-2 w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
         >
-          {lng.label}
-        </button>
-      ))}
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      <select
+        className="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer"
+        value={active}
+        onChange={(e) => changeLanguage(e.target.value)}
+      >
+        <option value="en">English</option>
+        <option value="hi">Hindi</option>
+        <option value="mr">Marathi</option>
+      </select>
     </div>
   );
 }

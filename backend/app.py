@@ -1,11 +1,12 @@
 from flask import Flask, request, jsonify, send_from_directory
 from config import Config
-from models import db, bcrypt, User, Product, Order, OrderItem
-from flask_jwt_extended import JWTManager, create_access_token, get_jwt, jwt_required
+from models import db, bcrypt, User, Product, Order, OrderItem, CartItem
+from flask_jwt_extended import JWTManager, create_access_token, get_jwt, jwt_required,get_jwt_identity
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 from routes.cart import cart_bp
 import os
+import json
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -265,7 +266,7 @@ def get_users():
 
 @app.route("/api/admin/orders", methods=["GET"])
 @jwt_required()
-def get_orders():
+def admin_get_orders():
 
     claims = get_jwt()
 
@@ -286,5 +287,97 @@ def get_orders():
 
     return jsonify(data)
 
+# ---------------- SEARCH PRODUCTS ----------------
+@app.route("/api/products/search", methods=["GET"])
+def search_products():
+    q = request.args.get("q", "").strip().lower()
+    if not q:
+        return jsonify([])
+
+    # Case-insensitive search on product name
+    products = Product.query.filter(Product.name.ilike(f"%{q}%")).all()
+
+    data = []
+    for p in products:
+        data.append({
+            "id": p.id,
+            "name": p.name,
+            "description": p.description,
+            "price": p.price,
+            "stock": p.stock,
+            "category": p.category,
+            "image": f"http://localhost:5000/static/uploads/{p.image}" if p.image else "http://localhost:5000/static/uploads/default.jpg"
+        })
+
+    return jsonify(data)
+
+@app.route("/api/orders", methods=["POST"])
+@jwt_required()
+def create_order():
+    user_id = get_jwt_identity()
+    data = request.json
+
+    try:
+        # 1. Create the Order
+        new_order = Order(
+            user_id=user_id,
+            payment_method=data.get("payment"), 
+            address=json.dumps(data.get("address")),
+            total_price=float(data.get("total")) # Ensure this matches the key from frontend
+        )
+        db.session.add(new_order)
+        db.session.flush() # This generates the ID for new_order
+
+        # 2. Create Order Items
+        for p in data.get("products", []):
+            # Check if price exists in product data, else fetch from DB
+            item_price = p.get("price")
+            if not item_price:
+                product_record = Product.query.get(p["productId"])
+                item_price = product_record.price
+
+            order_item = OrderItem(
+                order_id=new_order.id,
+                product_id=p["productId"],
+                quantity=p["quantity"],
+                price=item_price
+            )
+            db.session.add(order_item)
+
+        # 3. Clear the Cart
+        CartItem.query.filter_by(user_id=user_id).delete()
+        
+        db.session.commit()
+        return jsonify({"msg": "Order placed successfully", "order_id": new_order.id}), 201
+
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error creating order: {str(e)}") # This will show in your terminal
+        return jsonify({"msg": "Server error while placing order"}), 500
+    
+@app.route("/api/orders", methods=["GET"])
+@jwt_required()
+def get_orders():
+    user_id = get_jwt_identity()
+    orders = Order.query.filter_by(user_id=user_id).order_by(Order.created_at.desc()).all()
+    data = []
+    for o in orders:
+        data.append({
+            "id": o.id,
+            "status": o.status,
+            "payment": o.payment_method,
+            "total": o.total_price,
+            "createdAt": o.created_at.strftime("%Y-%m-%d"),
+            "products": [
+                {
+                    "product_id": item.product.id,
+                    "name": item.product.name,
+                    "price": item.product.price,
+                    "quantity": item.quantity,
+                    "image": f"http://localhost:5000/static/uploads/{item.product.image}" if item.product.image else "http://localhost:5000/static/uploads/default.jpg"
+                } for item in o.items
+            ]
+        })
+    return jsonify(data)
 if __name__ == "__main__":
     app.run(debug=True)

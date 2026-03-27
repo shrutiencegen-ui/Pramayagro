@@ -49,14 +49,10 @@ export default function AdminLayout() {
         <div className="flex flex-col h-full p-6">
           
           {/* Logo Section */}
-          <div className="flex items-center gap-3 mb-10 px-2">
-            <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
-              <span className="text-black font-black text-xl">P</span>
-            </div>
-            <h2 className="text-xl font-bold tracking-tight text-white">
-              Pramya<span className="text-emerald-400 text-sm ml-1 uppercase">Agro</span>
-            </h2>
-          </div>
+          {/* Logo Section */}
+<div className="flex justify-center items-center mb-10 px-2">
+  <img src="/logo.png" alt="Logo" className="h-12 w-auto" />
+</div>
 
           {/* Navigation */}
           <nav className="flex-1 space-y-2">

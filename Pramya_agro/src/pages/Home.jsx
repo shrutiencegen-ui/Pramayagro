@@ -234,12 +234,7 @@ export default function Home() {
                       ${theme === "dark" ? "text-green-400" : "text-green-600"}`}>
                       ₹{product.price}
                     </span>
-                    <Link to={`/products/${product.id}`} className="group-hover:scale-110 transition-transform">
-                      <button className={`p-3 rounded-full transition-colors
-                        ${theme === "dark" ? "bg-white/10 text-green-400 hover:bg-green-500 hover:text-white" : "bg-gray-100 text-gray-700 hover:bg-green-500 hover:text-white"}`}>
-                        <ShoppingBag size={18}/>
-                      </button>
-                    </Link>
+                    
                   </div>
                 </div>
               </div>

@@ -71,7 +71,7 @@ export default function Products() {
 
   const buyNow = async (product) => {
     await addToCart(product);
-    navigate("/cart");
+    navigate("/checkout");
   };
 
   const isInCart = (id) => cart.some(item => item.productId === id);

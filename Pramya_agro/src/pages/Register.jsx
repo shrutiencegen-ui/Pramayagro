@@ -1,9 +1,13 @@
+"use client";
+
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import API from "../services/api";
+import { useTheme } from "../context/ThemeContext";
 
 export default function Register() {
   const navigate = useNavigate();
+  const { theme } = useTheme();
 
   const [form, setForm] = useState({
     name: "",
@@ -68,20 +72,33 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center dark:bg-[#050707] bg-white] text-white px-6">
+    <div
+      className={`min-h-screen flex items-center justify-center px-6 transition-colors duration-300 ${
+        theme === "dark" ? "bg-[#050707] text-white" : "bg-white text-black"
+      }`}
+    >
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-md bg-white/5 backdrop-blur-xl border border-white/10 p-10 rounded-3xl space-y-5"
+        className={`w-full max-w-md p-10 rounded-3xl space-y-5 transition-colors duration-300
+          ${theme === "dark"
+            ? "bg-white/5 backdrop-blur-xl border border-white/10"
+            : "bg-white shadow-md border border-gray-200"
+          }`}
       >
-        <h2 className="text-3xl font-bold text-center text-emerald-400">
+        <h2
+          className={`text-3xl font-bold text-center ${
+            theme === "dark" ? "text-emerald-400" : "text-emerald-500"
+          }`}
+        >
           Create Account
         </h2>
 
+        {/* API ERROR */}
         {errors.api && (
-          <p className="text-red-400 text-sm text-center">{errors.api}</p>
+          <p className="text-red-500 text-sm text-center">{errors.api}</p>
         )}
 
-        {/* Name */}
+        {/* NAME */}
         <div>
           <input
             type="text"
@@ -89,14 +106,18 @@ export default function Register() {
             placeholder="Full Name"
             value={form.name}
             onChange={handleChange}
-            className="w-full p-3 bg-black/40 border border-white/10 rounded-lg focus:border-emerald-500 outline-none"
+            className={`w-full p-3 rounded-lg outline-none transition-colors duration-300
+              ${theme === "dark"
+                ? "bg-black/40 border border-white/10 text-white placeholder:text-gray-400 focus:border-emerald-400"
+                : "bg-gray-100 border border-gray-300 text-black placeholder:text-gray-500 focus:border-emerald-500"
+              }`}
           />
           {errors.name && (
-            <p className="text-red-400 text-xs mt-1">{errors.name}</p>
+            <p className="text-red-500 text-xs mt-1">{errors.name}</p>
           )}
         </div>
 
-        {/* Email */}
+        {/* EMAIL */}
         <div>
           <input
             type="email"
@@ -104,14 +125,18 @@ export default function Register() {
             placeholder="Email"
             value={form.email}
             onChange={handleChange}
-            className="w-full p-3 bg-black/40 border border-white/10 rounded-lg focus:border-emerald-500 outline-none"
+            className={`w-full p-3 rounded-lg outline-none transition-colors duration-300
+              ${theme === "dark"
+                ? "bg-black/40 border border-white/10 text-white placeholder:text-gray-400 focus:border-emerald-400"
+                : "bg-gray-100 border border-gray-300 text-black placeholder:text-gray-500 focus:border-emerald-500"
+              }`}
           />
           {errors.email && (
-            <p className="text-red-400 text-xs mt-1">{errors.email}</p>
+            <p className="text-red-500 text-xs mt-1">{errors.email}</p>
           )}
         </div>
 
-        {/* Password */}
+        {/* PASSWORD */}
         <div>
           <input
             type="password"
@@ -119,24 +144,39 @@ export default function Register() {
             placeholder="Password"
             value={form.password}
             onChange={handleChange}
-            className="w-full p-3 bg-black/40 border border-white/10 rounded-lg focus:border-emerald-500 outline-none"
+            className={`w-full p-3 rounded-lg outline-none transition-colors duration-300
+              ${theme === "dark"
+                ? "bg-black/40 border border-white/10 text-white placeholder:text-gray-400 focus:border-emerald-400"
+                : "bg-gray-100 border border-gray-300 text-black placeholder:text-gray-500 focus:border-emerald-500"
+              }`}
           />
           {errors.password && (
-            <p className="text-red-400 text-xs mt-1">{errors.password}</p>
+            <p className="text-red-500 text-xs mt-1">{errors.password}</p>
           )}
         </div>
 
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-emerald-500 py-3 rounded-lg font-bold hover:bg-emerald-600 transition disabled:opacity-50"
+          className={`w-full py-3 rounded-lg font-bold transition-colors duration-300
+            ${theme === "dark"
+              ? "bg-emerald-500 text-black hover:bg-emerald-600"
+              : "bg-emerald-500 text-white hover:bg-emerald-600"
+            } disabled:opacity-50`}
         >
           {loading ? "Creating..." : "Register"}
         </button>
 
-        <p className="text-sm text-center text-gray-400">
+        <p
+          className={`text-sm text-center transition-colors duration-300 ${
+            theme === "dark" ? "text-gray-400" : "text-gray-600"
+          }`}
+        >
           Already have an account?{" "}
-          <Link to="/login" className="text-emerald-400 hover:underline">
+          <Link
+            to="/login"
+            className={`text-emerald-400 hover:underline transition-colors duration-300`}
+          >
             Login
           </Link>
         </p>

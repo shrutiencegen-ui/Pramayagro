@@ -33,7 +33,9 @@ class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     total_price = db.Column(db.Float, nullable=False)
+    payment_method = db.Column(db.String(50), nullable=False)
     status = db.Column(db.String(20), default="pending")
+    address = db.Column(db.Text, nullable=False) 
     items=db.relationship("OrderItem", backref="order", lazy=True, cascade="all, delete")
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 

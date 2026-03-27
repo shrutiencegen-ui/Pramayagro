@@ -1,4 +1,19 @@
-/* Hide Google default UI */
+/* REMOVE GOOGLE TOP BAR */
+.goog-te-banner-frame.skiptranslate {
+  display: none !important;
+}
+
+/* REMOVE BODY SHIFT */
+body {
+  top: 0px !important;
+}
+
+/* REMOVE GOOGLE TOOLBAR GAP */
+body > .skiptranslate {
+  display: none !important;
+}
+
+/* HIDE GOOGLE TEXT */
 .goog-logo-link,
 .goog-te-gadget span {
   display: none !important;
@@ -8,11 +23,12 @@
   font-size: 0 !important;
 }
 
-/* Remove iframe gap */
-.goog-te-banner-frame.skiptranslate {
+/* REMOVE BOTTOM FRAME IF ANY */
+iframe.goog-te-banner-frame {
   display: none !important;
 }
 
-body {
-  top: 0px !important;
+/* EXTRA HARD FIX */
+html {
+  height: auto !important;
 }

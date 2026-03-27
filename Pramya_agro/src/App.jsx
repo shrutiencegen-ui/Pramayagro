@@ -22,6 +22,7 @@ import AdminProducts from "./pages/Admin/Products";
 import AddProduct from "./pages/Admin/AddProduct";
 import AdminLayout from "./pages/Admin/AdminLayout";
 import Hydroponics from "./pages/Hydroponics";
+import Blogs from "./pages/blogs";
 
 import { useTheme } from "./context/ThemeContext";
 function App() {
@@ -42,6 +43,7 @@ function App() {
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<ContactUs />} />
           <Route path="/hydroponics" element={<Hydroponics />} />
+          <Route path="/blogs" element={<Blogs />} />
 
           <Route
             path="/cart"

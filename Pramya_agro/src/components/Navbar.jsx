@@ -6,7 +6,7 @@ import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import API from "../services/api";
 import { useTheme } from "../context/ThemeContext";
-
+import GoogleTranslate from "./LanguageSwitcher";
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const { user, logout } = useAuth();
@@ -132,6 +132,7 @@ export default function Navbar() {
                 </span>
               )}
             </Link>
+            <GoogleTranslate />
           </div>
         </div>
 

@@ -9,6 +9,9 @@ class Config:
     # Render cha DATABASE_URL ghenyasathi logic
     database_url = os.environ.get("DATABASE_URL", "sqlite:///Pramay.db")
     
+    CLOUDINARY_CLOUD_NAME = os.environ.get("CLOUDINARY_CLOUD_NAME")
+    CLOUDINARY_API_KEY = os.environ.get("CLOUDINARY_API_KEY")
+    CLOUDINARY_API_SECRET = os.environ.get("CLOUDINARY_API_SECRET")
     # SQLAlchemy sathi 'postgres://' la 'postgresql://' madhe badla
     if database_url.startswith("postgres://"):
         database_url = database_url.replace("postgres://", "postgresql://", 1)

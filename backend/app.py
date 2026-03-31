@@ -16,10 +16,10 @@ app.register_blueprint(cart_bp, url_prefix='/api/cart')
 
 bcrypt.init_app(app)
 jwt = JWTManager(app)
-
+BASE_URL = os.environ.get("BASE_URL", "http://localhost:5000")
 CORS(app, resources={
     r"/*": {
-        "origins": ["http://localhost:5173"],
+        "origins": ["http://localhost:5173","https://pramayagro.vercel.app/"],
         "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         "allow_headers": ["Content-Type", "Authorization"]
     }
@@ -32,11 +32,10 @@ with app.app_context():
     db.create_all()
 
 # ---------------- UPLOAD FOLDER ----------------
-UPLOAD_FOLDER = os.path.join(os.getcwd(), 'static', 'uploads')
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+if not os.path.exists(app.config['UPLOAD_FOLDER']):
+    os.makedirs(app.config['UPLOAD_FOLDER'])
 
-if not os.path.exists(UPLOAD_FOLDER):
-    os.makedirs(UPLOAD_FOLDER)
+
 
 # ✅ IMPORTANT: serve uploaded images
 @app.route('/static/uploads/<filename>')
@@ -118,7 +117,7 @@ def get_products():
             "stock": p.stock,
             "category": p.category,
             # ✅ FIXED IMAGE PATH
-            "image": f"http://localhost:5000/static/uploads/{p.image}" if p.image else "http://localhost:5000/static/uploads/default.jpg"
+            "image": f"{BASE_URL}/static/uploads/{p.image}" if p.image else f"{BASE_URL}/static/uploads/default.jpg"
         })
 
     return jsonify(data)

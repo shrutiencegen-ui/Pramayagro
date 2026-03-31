@@ -9,6 +9,8 @@ from werkzeug.utils import secure_filename
 from routes.cart import cart_bp
 import os
 import json
+import cloudinary
+import cloudinary.uploader
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -16,10 +18,20 @@ app.register_blueprint(cart_bp, url_prefix='/api/cart')
 
 bcrypt.init_app(app)
 jwt = JWTManager(app)
+
+# cloudinary
+cloudinary.config(
+    cloud_name=os.environ.get("CLOUDINARY_CLOUD_NAME"),
+    api_key=os.environ.get("CLOUDINARY_API_KEY"),
+    api_secret=os.environ.get("CLOUDINARY_API_SECRET"),
+    secure=True
+)
+
+
 BASE_URL = os.environ.get("BASE_URL", "http://localhost:5000")
 CORS(app, resources={
     r"/*": {
-        "origins": ["http://localhost:5173","https://pramayagro.vercel.app/"],
+        "origins": ["http://localhost:5173","https://pramayagro.vercel.app"],
         "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         "allow_headers": ["Content-Type", "Authorization"]
     }
@@ -31,13 +43,19 @@ db.init_app(app)
 with app.app_context():
     db.create_all()
 
+# ✅ HELPER FUNCTION FOR IMAGE URL (Cloudinary vs Local)
+def get_image_url(image_name):
+    if not image_name:
+        return f"{BASE_URL}/static/uploads/default.jpg"
+    if image_name.startswith('http'):
+        return image_name
+    return f"{BASE_URL}/static/uploads/{image_name}"
+
 # ---------------- UPLOAD FOLDER ----------------
 if not os.path.exists(app.config['UPLOAD_FOLDER']):
     os.makedirs(app.config['UPLOAD_FOLDER'])
 
-
-
-# ✅ IMPORTANT: serve uploaded images
+# ✅ serve uploaded images
 @app.route('/static/uploads/<filename>')
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
@@ -109,6 +127,7 @@ def get_products():
     data = []
 
     for p in products:
+        image_path = get_image_url(p.image)
         data.append({
             "id": p.id,
             "name": p.name,
@@ -116,8 +135,7 @@ def get_products():
             "price": p.price,
             "stock": p.stock,
             "category": p.category,
-            # ✅ FIXED IMAGE PATH
-            "image": f"{BASE_URL}/static/uploads/{p.image}" if p.image else f"{BASE_URL}/static/uploads/default.jpg"
+            "image": image_path
         })
 
     return jsonify(data)
@@ -139,12 +157,11 @@ def add_product():
     category = request.form.get("category")
 
     file = request.files.get("image")
-    image_filename = "default.jpg"
+    image_location = "default.jpg"
 
     if file:
-        filename = secure_filename(file.filename)
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        image_filename = filename
+        upload_result = cloudinary.uploader.upload(file, folder="pramay_products")
+        image_location = upload_result['secure_url']
 
     product = Product(
         name=name,
@@ -152,7 +169,7 @@ def add_product():
         price=float(price) if price else 0,
         stock=int(stock) if stock else 0,
         category=category,
-        image=image_filename
+        image=image_location
     )
 
     db.session.add(product)
@@ -176,6 +193,7 @@ def delete_product(id):
     db.session.commit()
 
     return jsonify({"msg": "Product deleted"})
+
 # ---------------- UPDATE PRODUCT ----------------
 @app.route("/api/admin/products/<int:id>", methods=["PUT"])
 @jwt_required()
@@ -186,14 +204,13 @@ def update_product(id):
 
     product = Product.query.get_or_404(id)
 
-    # Detect if data is JSON or form-data
     if request.content_type.startswith("application/json"):
         data = request.json
         product.name = data.get("name", product.name)
         product.description = data.get("description", product.description)
         product.price = float(data.get("price", product.price))
         product.stock = int(data.get("stock", product.stock))
-    else:  # form-data
+    else:
         product.name = request.form.get("name", product.name)
         product.description = request.form.get("description", product.description)
         price = request.form.get("price")
@@ -203,9 +220,8 @@ def update_product(id):
 
         file = request.files.get("image")
         if file:
-            filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            product.image = filename
+            upload_result = cloudinary.uploader.upload(file, folder="pramay_products")
+            product.image = upload_result['secure_url']
 
     db.session.commit()
     return jsonify({"msg": "Product updated successfully"})
@@ -290,9 +306,9 @@ def admin_get_orders():
                 {
                     "product_id": item.product.id,
                     "name": item.product.name,
-                    "price": item.product.price,
+                    "price": item.price,
                     "quantity": item.quantity,
-                    "image": f"http://localhost:5000/static/uploads/{item.product.image}" if item.product.image else "http://localhost:5000/static/uploads/default.jpg"
+                    "image": get_image_url(item.product.image)
                 }
                 for item in o.items
             ]
@@ -301,7 +317,6 @@ def admin_get_orders():
     return jsonify(data)
 
 #Update orders
-# app.py
 @app.route("/api/admin/orders/<int:id>", methods=["PUT"])
 @jwt_required()
 def admin_update_order(id):
@@ -338,7 +353,6 @@ def search_products():
     if not q:
         return jsonify([])
 
-    # Case-insensitive search on product name
     products = Product.query.filter(Product.name.ilike(f"%{q}%")).all()
 
     data = []
@@ -350,7 +364,7 @@ def search_products():
             "price": p.price,
             "stock": p.stock,
             "category": p.category,
-            "image": f"http://localhost:5000/static/uploads/{p.image}" if p.image else "http://localhost:5000/static/uploads/default.jpg"
+            "image": get_image_url(p.image)
         })
 
     return jsonify(data)
@@ -362,19 +376,16 @@ def create_order():
     data = request.json
 
     try:
-        # 1. Create the Order
         new_order = Order(
             user_id=user_id,
             payment_method=data.get("payment"), 
             address=json.dumps(data.get("address")),
-            total_price=float(data.get("total")) # Ensure this matches the key from frontend
+            total_price=float(data.get("total")) 
         )
         db.session.add(new_order)
-        db.session.flush() # This generates the ID for new_order
+        db.session.flush() 
 
-        # 2. Create Order Items
         for p in data.get("products", []):
-            # Check if price exists in product data, else fetch from DB
             item_price = p.get("price")
             if not item_price:
                 product_record = Product.query.get(p["productId"])
@@ -388,7 +399,6 @@ def create_order():
             )
             db.session.add(order_item)
 
-        # 3. Clear the Cart
         CartItem.query.filter_by(user_id=user_id).delete()
         
         db.session.commit()
@@ -396,7 +406,7 @@ def create_order():
 
     except Exception as e:
         db.session.rollback()
-        print(f"Error creating order: {str(e)}") # This will show in your terminal
+        print(f"Error creating order: {str(e)}") 
         return jsonify({"msg": "Server error while placing order"}), 500
     
 @app.route("/api/orders", methods=["GET"])
@@ -416,9 +426,9 @@ def get_orders():
                 {
                     "product_id": item.product.id,
                     "name": item.product.name,
-                    "price": item.product.price,
+                    "price": item.price,
                     "quantity": item.quantity,
-                    "image": f"http://localhost:5000/static/uploads/{item.product.image}" if item.product.image else "http://localhost:5000/static/uploads/default.jpg"
+                    "image": get_image_url(item.product.image)
                 } for item in o.items
             ]
         })
@@ -428,22 +438,19 @@ from collections import Counter
 
 @app.route('/api/admin/stats', methods=['GET'])
 def get_stats():
-    # 1. Total Users, Orders, Revenue calculate kar (Tuzya kade aselch)
-    total_users = User.query.count()
+    total_users = User.query.filter_by(role="user").count()
     orders = Order.query.all()
     total_revenue = sum(order.total_price for order in orders)
     
-    # 2. Product Demand Logic (User ne kiti orders kelya tithun)
     product_counts = Counter()
     product_revenue = Counter()
     
     for order in orders:
-        # Order madhle products extract kar (assuming order.items or similar)
         for item in order.items: 
-            product_counts[item.product_name] += item.quantity
-            product_revenue[item.product_name] += (item.price * item.quantity)
+            p_name = item.product.name 
+            product_counts[p_name] += item.quantity
+            product_revenue[p_name] += (item.price * item.quantity)
 
-    # 3. Data format kar Charts sathi
     product_stats = []
     for name, sales in product_counts.items():
         product_stats.append({
@@ -455,8 +462,9 @@ def get_stats():
     return jsonify({
         "total_users": total_users,
         "total_orders": len(orders),
-        "total_revenue": total_revenue,
+        "total_revenue": float(total_revenue),
         "product_stats": product_stats 
     })
+
 if __name__ == "__main__":
     app.run(debug=True)

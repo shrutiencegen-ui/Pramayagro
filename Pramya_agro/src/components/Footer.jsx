@@ -1,5 +1,5 @@
 import { Facebook, Instagram, Linkedin, Twitter } from "lucide-react";
-import { Link } from "react-router-dom"; // <-- for navigation
+import { Link } from "react-router-dom";
 
 export default function Footer() {
   const quickLinks = [
@@ -12,21 +12,30 @@ export default function Footer() {
   ];
 
   return (
-    <footer className="relative dark:bg-[#050707] bg-white] text-gray-300 pt-20 pb-10 border-t border-white/5 overflow-hidden">
+    <footer className="relative overflow-hidden text-gray-300 pt-20 pb-10">
 
-      {/* Glow Background */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[300px] bg-emerald-600/10 blur-[140px] rounded-full pointer-events-none" />
+      {/* 🌈 GRADIENT BACKGROUND */}
+      <div className="absolute inset-0 bg-gradient-to-br from-[#020403] via-[#07120c] to-[#020403]" />
+
+      {/* ✨ GLOW EFFECT */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[300px] bg-emerald-500/10 blur-[160px] rounded-full pointer-events-none" />
 
       <div className="relative z-10 max-w-7xl mx-auto px-6 grid md:grid-cols-4 gap-14">
 
-        {/* Brand */}
+        {/* 🔥 BRAND */}
         <div>
-          {/* Logo */}
-          <Link to="/" className="flex items-center gap-3">
-            <img src="/logo.png" alt="Pramay Agro Logo" className="h-10 w-auto object-contain" />
-            <h2 className="text-2xl font-semibold text-white tracking-wide">
-              Pramay <span className="text-emerald-400">Agro</span>
-            </h2>
+          <Link to="/" className="flex items-center gap-3 group">
+
+            {/* ✨ Animated Logo */}
+            <img
+              src="/logo.png"
+              alt="Pramay Agro Logo"
+              className="h-10 w-auto object-contain transition-transform duration-500 group-hover:rotate-6 group-hover:scale-110"
+            />
+
+             <h1 className="text-xl font-black tracking-tighter text-gray-900 dark:text-white">
+              PRAMAY<span className="text-emerald-500">AGRO</span>
+            </h1>
           </Link>
 
           <p className="mt-4 text-sm text-gray-400 leading-relaxed max-w-xs">
@@ -34,12 +43,12 @@ export default function Footer() {
             intelligent farming systems and global-quality organic produce.
           </p>
 
-          {/* Social Icons */}
+          {/* 🌐 SOCIAL */}
           <div className="flex gap-4 mt-6">
             {[Facebook, Instagram, Linkedin, Twitter].map((Icon, i) => (
               <div
                 key={i}
-                className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 hover:bg-emerald-500/20 hover:border-emerald-500 transition duration-300 cursor-pointer"
+                className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 hover:bg-emerald-500/20 hover:border-emerald-500 transition duration-300 cursor-pointer hover:scale-110"
               >
                 <Icon size={18} className="text-gray-400 hover:text-emerald-400 transition" />
               </div>
@@ -47,7 +56,7 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Explore / Quick Links */}
+        {/* 🔗 LINKS */}
         <div>
           <h3 className="font-semibold text-white mb-6 tracking-wide">Explore</h3>
           <ul className="space-y-4 text-sm">
@@ -64,7 +73,7 @@ export default function Footer() {
           </ul>
         </div>
 
-        {/* Contact */}
+        {/* 📞 CONTACT */}
         <div>
           <h3 className="font-semibold text-white mb-6 tracking-wide">Contact</h3>
           <ul className="space-y-3 text-sm text-gray-400">
@@ -74,7 +83,7 @@ export default function Footer() {
           </ul>
         </div>
 
-        {/* Newsletter */}
+        {/* 📩 NEWSLETTER */}
         <div>
           <h3 className="font-semibold text-white mb-6 tracking-wide">
             Stay Updated
@@ -98,18 +107,40 @@ export default function Footer() {
 
       </div>
 
-      {/* Bottom Bar */}
-      <div className="mt-16 border-t border-white/5 pt-8 text-sm text-gray-500">
-        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p>© {new Date().getFullYear()} Pramay Agro. All rights reserved.</p>
+      {/* 🔻 BOTTOM */}
+  
+<div className="mt-16 border-t border-white/20 pt-6 text-sm text-gray-400 bg-black/30 backdrop-blur-md">
+  <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
 
-          <div className="flex gap-6 text-xs uppercase tracking-widest">
-            <span className="hover:text-emerald-400 cursor-pointer transition">Privacy</span>
-            <span className="hover:text-emerald-400 cursor-pointer transition">Terms</span>
-            <span className="hover:text-emerald-400 cursor-pointer transition">Sustainability</span>
-          </div>
-        </div>
-      </div>
+    {/* LEFT - COPYRIGHT */}
+    <p>
+      © {new Date().getFullYear()} Pramay Agro. All rights reserved.
+    </p>
+
+    {/* CENTER - LINKS */}
+    
+
+    {/* RIGHT - CREDIT */}
+    <div className="text-xs">
+      Designed & Developed by{" "}
+      <a
+        href="https://encegenailabs.com"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="relative font-semibold text-emerald-400 hover:text-emerald-300 transition"
+      >
+        Encegen AI Labs
+        <span className="absolute left-0 -bottom-1 w-full h-[1px] bg-emerald-400 scale-x-0 hover:scale-x-100 origin-left transition-transform"></span>
+      </a>
+    </div>
+<div className="flex gap-6 text-xs uppercase tracking-widest">
+      <Link to="/" className="hover:text-emerald-400 transition">Privacy</Link>
+      <Link to="/" className="hover:text-emerald-400 transition">Terms</Link>
+      <Link to="/" className="hover:text-emerald-400 transition">Sustainability</Link>
+    </div>
+  </div>
+</div>
+      
 
     </footer>
   );

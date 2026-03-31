@@ -7,7 +7,36 @@
 body {
   top: 0px !important;
 }
+/* REMOVE GOOGLE TOP/BOTTOM BAR */
+.goog-te-banner-frame.skiptranslate,
+iframe.goog-te-banner-frame,
+.skiptranslate,
+.goog-logo-link,
+.goog-te-gadget span,
+.goog-te-gadget {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  font-size: 0 !important;
+}
 
+/* REMOVE BODY SHIFT */
+body {
+  top: 0 !important;
+}
+
+/* FORCE HTML HEIGHT */
+html {
+  height: auto !important;
+}
+
+/* OPTIONAL: Force footer to stay flush */
+footer {
+  margin-bottom: 0 !important;
+}
 /* REMOVE GOOGLE TOOLBAR GAP */
 body > .skiptranslate {
   display: none !important;

@@ -54,10 +54,7 @@ export default function AdminDashboard() {
         />
       </div>
 
-      {/* Future Section for Charts */}
-      <div className="bg-black/20 border border-white/5 rounded-3xl p-8 h-64 flex items-center justify-center">
-        <p className="text-gray-500 italic">Analytics Chart Placeholder (Coming Soon)</p>
-      </div>
+    
     </div>
   );
 }

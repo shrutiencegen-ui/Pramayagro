@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import { useTheme } from "../context/ThemeContext";
 import API from "../services/api";
@@ -8,9 +9,13 @@ import toast from "react-hot-toast";
 
 export default function Checkout() {
   const { theme } = useTheme();
+  const location = useLocation();
+  
+  // If user clicked Buy Now, location.state?.buyNowItem contains that product
+  const buyNowItem = location.state?.buyNowItem || null;
 
   const [cart, setCart] = useState([]);
-  const [errors, setErrors] = useState({}); // Store field-specific errors
+  const [errors, setErrors] = useState({}); // Field-specific errors
 
   const [address, setAddress] = useState({
     name: "",
@@ -23,22 +28,26 @@ export default function Checkout() {
 
   const [payment, setPayment] = useState("COD");
 
-  // Fetch Cart
+  // Fetch Cart only if NOT Buy Now
   useEffect(() => {
-    const fetchCart = async () => {
-      try {
-        const res = await API.get("/cart");
-        setCart(res.data);
-      } catch {
-        toast.error("Failed to load cart");
-      }
-    };
-    fetchCart();
-  }, []);
+    if (!buyNowItem) {
+      const fetchCart = async () => {
+        try {
+          const res = await API.get("/cart");
+          setCart(res.data);
+        } catch {
+          toast.error("Failed to load cart");
+        }
+      };
+      fetchCart();
+    }
+  }, [buyNowItem]);
 
-  const total = cart.reduce((acc, i) => acc + i.price * i.quantity, 0);
+  // Items to checkout: Buy Now item or cart items
+  const itemsToCheckout = buyNowItem ? [buyNowItem] : cart;
 
-  // Validate all fields and return errors object
+  const total = itemsToCheckout.reduce((acc, i) => acc + i.price * i.quantity, 0);
+
   const validateAddress = () => {
     const newErrors = {};
     if (!address.name.trim()) newErrors.name = "Name is required";
@@ -54,47 +63,46 @@ export default function Checkout() {
     return newErrors;
   };
 
-// Inside Checkout.js placeOrder function
-// Inside your placeOrder function in checkout.jsx
-const placeOrder = async () => {
-  const validationErrors = validateAddress();
-  setErrors(validationErrors);
+  const placeOrder = async () => {
+    const validationErrors = validateAddress();
+    setErrors(validationErrors);
 
-  if (Object.keys(validationErrors).length === 0) {
-    try {
-      const token = localStorage.getItem("token");
-      const orderData = {
-        address,
-        payment,
-        products: cart.map((item) => ({
-          productId: item.id,
-          quantity: item.quantity,
-          price: item.price,
-        })),
-        total: total, // Use the calculated total
-      };
+    if (Object.keys(validationErrors).length === 0) {
+      try {
+        const token = localStorage.getItem("token");
+        const orderData = {
+          address,
+          payment,
+          products: itemsToCheckout.map((item) => ({
+            productId: item.id,
+            quantity: item.quantity,
+            price: item.price,
+          })),
+          total,
+        };
 
-      await API.post("/orders", orderData, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+        await API.post("/orders", orderData, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
-      toast.success("Order placed successfully 🎉");
-      setCart([]);
-      
-      // ✅ Redirect to Orders page after 2 seconds
-      setTimeout(() => {
-        window.location.href = "/orders"; 
-      }, 2000);
+        toast.success("Order placed successfully 🎉");
 
-    } catch (err) {
-      toast.error(err.response?.data?.msg || "Failed to place order");
+        // If it was a Buy Now item, no cart modification needed
+        // If normal cart checkout, optionally clear cart
+        if (!buyNowItem) setCart([]);
+
+        setTimeout(() => {
+          window.location.href = "/orders";
+        }, 2000);
+      } catch (err) {
+        toast.error(err.response?.data?.msg || "Failed to place order");
+      }
     }
-  }
-};
+  };
+
   return (
     <>
       <Navbar />
-
       <div
         className={`min-h-screen pt-28 px-6 ${
           theme === "dark" ? "bg-[#030504]" : "bg-[#f8fafc]"
@@ -103,7 +111,6 @@ const placeOrder = async () => {
         <div className="max-w-7xl mx-auto grid md:grid-cols-3 gap-8">
           {/* LEFT - ADDRESS */}
           <div className="md:col-span-2 space-y-6">
-            {/* Address Box */}
             <div
               className={`p-6 rounded-2xl ${
                 theme === "dark"
@@ -111,7 +118,9 @@ const placeOrder = async () => {
                   : "bg-white border shadow-sm"
               }`}
             >
-              <h2 className="text-xl font-bold mb-4 text-emerald-500">Shipping Address</h2>
+              <h2 className="text-xl font-bold mb-4 text-emerald-500">
+                Shipping Address
+              </h2>
               <div className="grid md:grid-cols-2 gap-4">
                 {Object.keys(address).map((field) => (
                   <div key={field} className="flex flex-col">
@@ -127,7 +136,6 @@ const placeOrder = async () => {
                         }
                         setAddress({ ...address, [field]: value });
 
-                        // Remove error as user types
                         if (errors[field]) {
                           setErrors({ ...errors, [field]: null });
                         }
@@ -139,7 +147,9 @@ const placeOrder = async () => {
                       }`}
                     />
                     {errors[field] && (
-                      <span className="text-red-500 text-sm mt-1">{errors[field]}</span>
+                      <span className="text-red-500 text-sm mt-1">
+                        {errors[field]}
+                      </span>
                     )}
                   </div>
                 ))}
@@ -154,34 +164,34 @@ const placeOrder = async () => {
                   : "bg-white border shadow-sm"
               }`}
             >
-              <h2 className="text-xl font-bold mb-4 text-emerald-500">Payment Method</h2>
+              <h2 className="text-xl font-bold mb-4 text-emerald-500">
+                Payment Method
+              </h2>
               <div className="space-y-3">
-               <label
-  className={`flex items-center gap-3 ${
-    theme === "dark" ? "text-white" : "text-black"
-  }`}
->
-  <input
-    type="radio"
-    checked={payment === "COD"}
-    onChange={() => setPayment("COD")}
-  />
-  Cash on Delivery
-</label>
-
-<label
-  className={`flex items-center gap-3 ${
-    theme === "dark" ? "text-white" : "text-black"
-  }`}
->
-  <input
-    type="radio"
-    checked={payment === "ONLINE"}
-    onChange={() => setPayment("ONLINE")}
-  />
-  Online Payment (UPI / Card)
-</label>
-
+                <label
+                  className={`flex items-center gap-3 ${
+                    theme === "dark" ? "text-white" : "text-black"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    checked={payment === "COD"}
+                    onChange={() => setPayment("COD")}
+                  />
+                  Cash on Delivery
+                </label>
+                <label
+                  className={`flex items-center gap-3 ${
+                    theme === "dark" ? "text-white" : "text-black"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    checked={payment === "ONLINE"}
+                    onChange={() => setPayment("ONLINE")}
+                  />
+                  Online Payment (UPI / Card)
+                </label>
               </div>
             </div>
           </div>
@@ -194,13 +204,17 @@ const placeOrder = async () => {
                 : "bg-white border shadow-sm"
             }`}
           >
-            <h2 className="text-xl font-bold mb-4 text-emerald-500">Order Summary</h2>
+            <h2 className="text-xl font-bold mb-4 text-emerald-500">
+              Order Summary
+            </h2>
             <div className="space-y-4">
-              {cart.map((item) => (
-                <div key={item.id}   className={`flex justify-between text-sm ${
-    theme === "dark" ? "text-white" : "text-black"
-  }`}
->
+              {itemsToCheckout.map((item) => (
+                <div
+                  key={item.id}
+                  className={`flex justify-between text-sm ${
+                    theme === "dark" ? "text-white" : "text-black"
+                  }`}
+                >
                   <span>
                     {item.name} x {item.quantity}
                   </span>
@@ -208,9 +222,11 @@ const placeOrder = async () => {
                 </div>
               ))}
               <hr className="opacity-20" />
-              <div className={`flex justify-between font-bold text-lg ${
-  theme === "dark" ? "text-white" : "text-black"
-}`}>
+              <div
+                className={`flex justify-between font-bold text-lg ${
+                  theme === "dark" ? "text-white" : "text-black"
+                }`}
+              >
                 <span>Total</span>
                 <span className="text-emerald-500">₹{total}</span>
               </div>

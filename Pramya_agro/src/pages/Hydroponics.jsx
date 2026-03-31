@@ -102,13 +102,18 @@ export default function HydroponicsPage() {
               </p>
 
               <Link to="/contact">
-                <button className={`mt-6 px-6 py-3 md:px-8 md:py-4 font-bold text-sm rounded-full uppercase tracking-widest shadow-lg transition-all
-                  ${theme === "dark"
-                    ? "bg-emerald-600 text-white hover:bg-emerald-500 hover:shadow-emerald-500/50"
-                    : "bg-emerald-500 text-black hover:bg-emerald-400 hover:shadow-emerald-500/50"
-                  }`}>
-                  Get Started <ArrowRight size={16} />
-                </button>
+               <div className="flex justify-center">
+  <button
+    className={`mt-6 px-6 py-3 md:px-8 md:py-4 font-bold text-sm rounded-full uppercase tracking-widest shadow-lg transition-all flex items-center gap-2
+    ${
+      theme === "dark"
+        ? "bg-emerald-600 text-white hover:bg-emerald-500 hover:shadow-emerald-500/50"
+        : "bg-emerald-500 text-black hover:bg-emerald-400 hover:shadow-emerald-500/50"
+    }`}
+  >
+    Get Started <ArrowRight size={16} />
+  </button>
+</div>
               </Link>
             </div>
           </div>
@@ -204,6 +209,14 @@ export default function HydroponicsPage() {
           </div>
         </div>
       </motion.section>
+      {/* VIDEO */} 
+      <motion.section className="py-20 md:py-28 px-4 text-center" initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} > <h2 className="text-3xl md:text-5xl font-bold mb-6">
+        See Hydroponics in Action</h2>
+         <div className="max-w-4xl mx-auto aspect-video rounded-2xl overflow-hidden border border-white/10 shadow-lg"> 
+         <iframe className="w-full h-full" src="https://www.youtube.com/embed/O-RgZ4z1jos" title="Hydroponics Tutorial" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
+          </div> 
+          </motion.section>
+          {/* CTA */} <motion.section className="py-20 md:py-28 text-center px-4" initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} > <h2 className="text-3xl md:text-5xl font-bold mb-4">Start Your Hydroponic Journey</h2> <p className="text-gray-400 mb-8 md:mb-10 text-base md:text-lg"> Join thousands adopting smart, sustainable farming techniques today. </p> <Link to="/contact"> <button className="px-8 py-3 md:px-10 md:py-4 bg-emerald-500 text-black rounded-full font-bold hover:bg-emerald-400 shadow-lg hover:shadow-emerald-500/50 transition-all"> Contact Us </button> </Link> </motion.section>
 
     </div>
   );

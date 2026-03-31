@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 from flask import Flask, request, jsonify, send_from_directory
 from config import Config
 from models import db, bcrypt, User, Product, Order, OrderItem, CartItem
@@ -82,15 +84,16 @@ def login():
         return jsonify({"msg": "Incorrect password"}), 401
 
     access_token = create_access_token(
-        identity=str(user.id),
-        additional_claims={
-            "email": user.email,
-            "role": user.role
-        }
+        identity=str(user.id), 
+        additional_claims={"role": user.role}
     )
+    
+    expires = datetime.utcnow() + timedelta(seconds=3600)
+    
 
     return jsonify({
         "token": access_token,
+        "expires_at": expires.isoformat(),
         "user": {
             "id": user.id,
             "name": user.name,
@@ -264,28 +267,70 @@ def get_users():
         "total": users_pagination.total
     })
 
+#get orders 
 @app.route("/api/admin/orders", methods=["GET"])
 @jwt_required()
 def admin_get_orders():
-
     claims = get_jwt()
 
     if claims["role"] != "admin":
         return jsonify({"msg": "Admin access only"}), 403
 
-    orders = Order.query.all()
+    orders = Order.query.order_by(Order.created_at.desc()).all()
 
     data = []
 
-    for order in orders:
+    for o in orders:
         data.append({
-            "id": order.id,
-            "user": order.user.email,
-            "total_price": order.total_price,
-            "status": order.status
+            "id": o.id,
+            "user": o.user.email,
+            "status": o.status,
+            "total_price": o.total_price,
+            "createdAt": o.created_at.strftime("%Y-%m-%d"),
+            "products": [
+                {
+                    "product_id": item.product.id,
+                    "name": item.product.name,
+                    "price": item.product.price,
+                    "quantity": item.quantity,
+                    "image": f"http://localhost:5000/static/uploads/{item.product.image}" if item.product.image else "http://localhost:5000/static/uploads/default.jpg"
+                }
+                for item in o.items
+            ]
         })
 
     return jsonify(data)
+
+#Update orders
+# app.py
+@app.route("/api/admin/orders/<int:id>", methods=["PUT"])
+@jwt_required()
+def admin_update_order(id):
+    claims = get_jwt()
+    if claims["role"] != "admin":
+        return jsonify({"msg": "Admin only"}), 403
+
+    order = Order.query.get_or_404(id)
+    data = request.json
+    status = data.get("status")
+    if status:
+        order.status = status
+        db.session.commit()
+        return jsonify({"msg": "Order status updated"})
+    return jsonify({"msg": "No status provided"}), 400
+
+#delete Order
+@app.route("/api/admin/orders/<int:id>", methods=["DELETE"])
+@jwt_required()
+def admin_delete_order(id):
+    claims = get_jwt()
+    if claims["role"] != "admin":
+        return jsonify({"msg": "Admin only"}), 403
+
+    order = Order.query.get_or_404(id)
+    db.session.delete(order)
+    db.session.commit()
+    return jsonify({"msg": "Order deleted successfully"})
 
 # ---------------- SEARCH PRODUCTS ----------------
 @app.route("/api/products/search", methods=["GET"])
@@ -379,5 +424,40 @@ def get_orders():
             ]
         })
     return jsonify(data)
+
+from collections import Counter
+
+@app.route('/api/admin/stats', methods=['GET'])
+def get_stats():
+    # 1. Total Users, Orders, Revenue calculate kar (Tuzya kade aselch)
+    total_users = User.query.count()
+    orders = Order.query.all()
+    total_revenue = sum(order.total_price for order in orders)
+    
+    # 2. Product Demand Logic (User ne kiti orders kelya tithun)
+    product_counts = Counter()
+    product_revenue = Counter()
+    
+    for order in orders:
+        # Order madhle products extract kar (assuming order.items or similar)
+        for item in order.items: 
+            product_counts[item.product_name] += item.quantity
+            product_revenue[item.product_name] += (item.price * item.quantity)
+
+    # 3. Data format kar Charts sathi
+    product_stats = []
+    for name, sales in product_counts.items():
+        product_stats.append({
+            "name": name,
+            "sales": sales,
+            "revenue": product_revenue[name]
+        })
+
+    return jsonify({
+        "total_users": total_users,
+        "total_orders": len(orders),
+        "total_revenue": total_revenue,
+        "product_stats": product_stats 
+    })
 if __name__ == "__main__":
     app.run(debug=True)

@@ -37,7 +37,8 @@ export default function Home() {
       className={`relative transition-colors duration-700 selection:bg-green-400 selection:text-white
       ${theme === "dark" ? "bg-[#020403] text-white" : "bg-[#FAF6F0] text-gray-900"}`}
     >
-      {/* HERO SECTION */}
+      
+       {/* HERO SECTION */}
       <section className="relative h-[100vh] w-full overflow-hidden">
         <Swiper
           modules={[Autoplay, EffectFade, Pagination]}
@@ -46,7 +47,7 @@ export default function Home() {
           loop
           className="absolute inset-0 w-full h-full"
         >
-          {[home1, home2, home3].map((img, i) => (
+          {[home1].map((img, i) => (
             <SwiperSlide key={i}>
               <div className="relative w-full h-full overflow-hidden">
                 <img
@@ -79,7 +80,7 @@ export default function Home() {
 
             <p
               className={`text-lg md:text-2xl max-w-2xl font-medium leading-relaxed
-              ${theme === "dark" ? "text-gray-300" : "text-gray-700"}`}
+              ${theme === "dark" ? "text-gray-300" : "text-gray-400"}`}
             >
               Pramay Agro brings sustainable, chemical-free farming directly to your table. Healthy food, happy planet.
             </p>

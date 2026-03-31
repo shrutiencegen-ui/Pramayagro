@@ -60,21 +60,23 @@ export default function Products() {
     if (!token) return toast.error("Please login to add items");
 
     try {
-      const res = await API.post("/cart/add", { productId: product.id, quantity: qty });
-      toast.success(res.data.msg || `${qty} kg ${product.name} added!`);
-      const cartRes = await API.get("/cart");
-      setCart(cartRes.data);
+        // Change: Send ID as it is (likely an integer), not String(product.id)
+        const res = await API.post("/cart/add", { productId: product.id, quantity: qty });
+        toast.success(res.data.msg || `${qty} kg ${product.name} added!`);
+
+        const cartRes = await API.get("/cart");
+        setCart(cartRes.data); // No need for manual normalization here if backend is consistent
     } catch (err) {
-      toast.error(err.response?.data?.msg || "Failed to add to cart");
+        toast.error(err.response?.data?.msg || "Failed to add to cart");
     }
+};
+
+  const buyNow = (product) => {
+    // Only the clicked product is passed to checkout
+    navigate("/checkout", { state: { buyNowItem: { ...product, quantity: quantities[product.id] || 1 } } });
   };
 
-  const buyNow = async (product) => {
-    await addToCart(product);
-    navigate("/checkout");
-  };
-
-  const isInCart = (id) => cart.some(item => item.productId === id);
+  const isInCart = (id) => cart.some(item => String(item.productId) === String(id));
 
   return (
     <div className={`min-h-screen relative ${theme === "dark" ? "bg-[#0b0f0d] text-gray-100" : "bg-emerald-50 text-gray-900"}`}>

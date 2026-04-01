@@ -7,9 +7,9 @@ export default function ContactUs() {
   const { theme } = useTheme();
 
   const contactCards = [
-    { icon: <Phone size={24} />, title: "Call Us", info: "+91 98765 43210" },
-    { icon: <Mail size={24} />, title: "Email", info: "info@pramayaagro.com" },
-    { icon: <MapPin size={24} />, title: "Location", info: "Maharashtra, India" },
+    { icon: <Phone size={24} />, title: "Call Us", info: "+91 7404042121" },
+    { icon: <Mail size={24} />, title: "Email", info: "pramayagro@gmail.com" },
+    { icon: <MapPin size={24} />, title: "Location", info: "Talawade, Pune - 411062" },
   ];
 
   return (
@@ -113,7 +113,24 @@ export default function ContactUs() {
           </form>
         </div>
       </div>
+{/* Map Section */}
 
+  <div className="max-w-7xl mx-auto px-6 pb-24">
+  <a
+    href="https://www.google.com/maps?q=Gate+No.+188+Jyotiba+Nagar+Near+Pandurang+Krupa+Hotel+Talawade+Pune+411062"
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    <div className="rounded-3xl overflow-hidden border shadow-lg cursor-pointer">
+      <iframe
+        src="https://www.google.com/maps?q=Gate+No.+188+Jyotiba+Nagar+Near+Pandurang+Krupa+Hotel+Talawade+Pune+411062&z=17&output=embed"
+        className="w-full h-[450px] pointer-events-none"
+      ></iframe>
     </div>
+  </a>
+</div>
+</div>
+
+  
   );
 }

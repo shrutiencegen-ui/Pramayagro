@@ -77,9 +77,9 @@ export default function Footer() {
         <div>
           <h3 className="font-semibold text-white mb-6 tracking-wide">Contact</h3>
           <ul className="space-y-3 text-sm text-gray-400">
-            <li>📍 Maharashtra, India</li>
-            <li>📞 +91 98765 43210</li>
-            <li>✉ info@Pramayagro.com</li>
+            <li>📍Gate No. 188, Jyotiba Nagar, Near By Pandurang Krupa Hotel, Talawade,Tal- Haveli, Dist-  Pune - 411062</li>
+            <li>📞 +91 7404042121</li>
+            <li>✉ pramayagro@gmail.com</li>
           </ul>
         </div>
 

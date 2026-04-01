@@ -467,15 +467,15 @@ def get_stats():
     })
 @app.route("/api/create-first-admin")
 def create_first_admin():
-    # आधीच हा ईमेल आहे का तपासा
+     
     admin_exists = User.query.filter_by(email="admin@gmail.com").first()
     if not admin_exists:
         new_admin = User(
             name="Admin",
             email="admin@gmail.com",
-            role="admin"  # इथे रोल admin सेट करणे महत्वाचे आहे
+            role="admin"  
         )
-        new_admin.set_password("admin123") # तुझा पासवर्ड इथे टाक
+        new_admin.set_password("admin123") 
         db.session.add(new_admin)
         db.session.commit()
         return "Admin created successfully!"

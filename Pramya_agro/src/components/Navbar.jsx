@@ -23,6 +23,7 @@ export default function Navbar() {
   const navLinks = [
     { to: "/", label: "Home" },
     { to: "/about", label: "About Us" },
+    {to:"/why-us", label:"Why Us"},
     { to: "/products", label: "Products" },
     { to: "/hydroponics", label: "Hydroponics" },
     { to: "/blogs", label: "Blogs" },

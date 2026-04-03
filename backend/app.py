@@ -121,7 +121,7 @@ def login():
 
 
 # ---------------- GET PRODUCTS ----------------
-@app.route("/api/products", methods=["GET"])
+@app.route("/api/admin/products", methods=["GET"])
 def get_products():
     products = Product.query.all()
     data = []

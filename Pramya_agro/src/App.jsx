@@ -25,6 +25,7 @@ import Checkout from "./pages/Checkout";
 import MyOrders from "./pages/MyOrders";
 import { useTheme } from "./context/ThemeContext";
 import ScrollToTop from "./components/ScrollToTop";
+import WhyUs from "./pages/WhyUs";
 
 function App() {
   const location = useLocation();
@@ -51,6 +52,7 @@ function App() {
           <Route path="/blogs" element={<Blogs />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/orders" element={<MyOrders />} />
+          <Route path="/why-us" element={<WhyUs />} />
 
           <Route
             path="/cart"

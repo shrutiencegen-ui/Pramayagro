@@ -3,44 +3,39 @@
 import { Link } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
 import { motion } from "framer-motion";
-import hydroponicImg from "../assets/hydroponic1.png";
-import organicImg from "../assets/organic.png";
-import verticalImg from "../assets/vertical.png";
-import iotImg from "../assets/iot.png";
+import fertilizerImg from "../assets/fertilizers.png";
+import pesticideImg from "../assets/pesticides.png";
+import soilImg from "../assets/soil.png";
+import growthImg from "../assets/growth.jpg";
 
-// Use local images stored in public/assets/blogs
 const blogs = [
   {
     id: 1,
-    title: "Sustainable Hydroponics Practices",
-    desc: "Learn eco-friendly hydroponic methods to grow more with less water and zero soil.",
-    category: "Hydroponics",
-    img: hydroponicImg,
-    
+    title: "Eco-Friendly Fertilizer Tips",
+    desc: "Maximize yield and maintain soil health using sustainable fertilizer practices.",
+    category: "Fertilizers",
+    img: fertilizerImg,
   },
   {
     id: 2,
-    title: "Organic Farming Tips for Beginners",
-    desc: "Start your organic journey with simple, effective, and chemical-free farming techniques.",
-    category: "Organic",
-    img: organicImg,
-    
+    title: "Effective Pest Control Solutions",
+    desc: "Protect crops with safe, eco-conscious pesticides for chemical-free farming.",
+    category: "Pesticides",
+    img: pesticideImg,
   },
   {
     id: 3,
-    title: "Maximizing Growth in Vertical Farms",
-    desc: "Use vertical farming to boost yield in limited space with smart hydroponic systems.",
-    category: "Vertical Farming",
-    img: verticalImg,
-  
+    title: "Soil Health & Regeneration",
+    desc: "Boost soil fertility naturally to achieve consistent, healthy crops.",
+    category: "Soil Care",
+    img: soilImg,
   },
   {
     id: 4,
-    title: "Smart IoT Sensors for Farms",
-    desc: "Monitor crops in real-time using smart sensors and AI-driven farming insights.",
-    category: "Smart Farming",
-    img: iotImg,
-    
+    title: "Maximizing Crop Growth",
+    desc: "Use data-driven methods and organic techniques to improve yield.",
+    category: "Crop Growth",
+    img: growthImg,
   },
 ];
 
@@ -54,15 +49,25 @@ export default function Blogs() {
     >
       {/* HERO */}
       <section className="relative py-32 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-emerald-700/80 to-green-400/60 blur-2xl"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-emerald-700/80 to-green-400/60 blur-3xl animate-blob-slow"></div>
 
-        <div className="relative max-w-5xl mx-auto text-center px-6">
-          <h1 className="text-5xl md:text-6xl font-extrabold text-white drop-shadow-xl">
-            Organic Insights 🌿
-          </h1>
-          <p className="mt-4 text-lg md:text-xl text-white/90">
-            Smart hydroponics, organic farming & sustainable agriculture knowledge hub.
-          </p>
+        <div className="relative max-w-5xl mx-auto text-center px-6 z-10">
+          <motion.h1
+            initial={{ opacity: 0, y: -50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="text-5xl md:text-6xl font-extrabold text-white drop-shadow-2xl"
+          >
+            Agro Knowledge Hub 🌿
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="mt-4 text-lg md:text-xl text-white/90"
+          >
+            Fertilizers, pest management, soil care & crop growth insights for modern farmers.
+          </motion.p>
         </div>
       </section>
 
@@ -71,19 +76,19 @@ export default function Blogs() {
         {blogs.map((blog, i) => (
           <motion.div
             key={blog.id}
-            initial={{ opacity: 0, y: 50 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.15 }}
+            initial={{ opacity: 0, y: 50, scale: 0.95 }}
+            whileInView={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ delay: i * 0.15, type: "spring", stiffness: 120 }}
             viewport={{ once: true }}
-            className="group relative rounded-3xl overflow-hidden"
+            className="group relative rounded-3xl overflow-hidden shadow-2xl hover:shadow-emerald-400/40 transition-all duration-500"
           >
             {/* CARD */}
             <div
-              className={`h-full border transition-all duration-500 rounded-3xl shadow-lg
+              className={`h-full border rounded-3xl overflow-hidden relative transition-all duration-500
               ${theme === "dark"
                 ? "bg-gradient-to-br from-white/5 via-white/3 to-white/5 border-white/10 hover:border-emerald-400/50"
                 : "bg-white border-gray-200 hover:border-green-400"
-              } hover:shadow-2xl`}
+              }`}
             >
               {/* IMAGE */}
               <div className="relative h-64 overflow-hidden rounded-t-3xl">
@@ -93,7 +98,7 @@ export default function Blogs() {
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                 />
                 {/* Gradient overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
                 {/* CATEGORY TAG */}
                 <span className="absolute top-4 left-4 px-3 py-1 text-xs font-bold bg-emerald-500 text-black rounded-full shadow-md">
                   {blog.category}
@@ -109,7 +114,7 @@ export default function Blogs() {
                   {blog.desc}
                 </p>
                 <Link
-                  to={blog.link}
+                  to={`/blogs/${blog.id}`}
                   className="mt-auto inline-flex items-center gap-2 font-bold text-sm uppercase tracking-wider text-emerald-500 hover:text-emerald-400 transition-colors"
                 >
                   Read More →
@@ -120,27 +125,30 @@ export default function Blogs() {
         ))}
       </section>
 
-      {/* CTA */}
+      {/* PREMIUM CTA */}
       <section className="py-24 text-center px-6">
-        <div
-          className={`max-w-4xl mx-auto p-12 rounded-3xl backdrop-blur-xl border shadow-lg
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.6 }}
+          className={`max-w-4xl mx-auto p-12 rounded-3xl backdrop-blur-xl border shadow-2xl
           ${theme === "dark"
             ? "bg-white/5 border-white/10"
             : "bg-white border-gray-200"
           }`}
         >
           <h2 className="text-3xl md:text-5xl font-extrabold mb-4">
-            Grow Smarter with Us 🌱
+            Level Up Your Farming 🌱
           </h2>
           <p className="mb-8 text-lg">
-            Stay updated with modern farming trends, organic techniques, and hydroponic innovations.
+            Subscribe for premium guides, expert tips on fertilizers, pest control, and sustainable agriculture.
           </p>
-          <Link to="/signup">
-            <button className="px-12 py-4 bg-emerald-500 text-black font-bold rounded-full hover:bg-emerald-400 shadow-lg hover:shadow-emerald-500/50 transition-all">
+          <Link to="/register">
+            <button className="px-12 py-4 bg-emerald-500 text-black font-bold rounded-full hover:bg-emerald-400 shadow-lg hover:shadow-emerald-500/50 transition-all transform hover:-translate-y-1">
               Subscribe Now
             </button>
           </Link>
-        </div>
+        </motion.div>
       </section>
     </div>
   );

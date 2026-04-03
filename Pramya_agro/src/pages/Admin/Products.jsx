@@ -32,7 +32,7 @@ export default function Products() {
 
   const fetchProducts = () => {
     setLoading(true);
-    API.get("/products")
+    API.get("api/products")
       .then((res) => setProducts(res.data))
       .catch((err) => console.error(err))
       .finally(() => setLoading(false));
@@ -163,36 +163,45 @@ export default function Products() {
               </tr>
             ) : (
               filteredProducts.map((p) => (
-                <tr key={p.id} className="border-t border-white/5 hover:bg-white/5">
+               // Inside the table row <tr>
+<tr key={p.id} className="border-t border-white/5 hover:bg-white/5">
 
-                  <td className="p-5 flex items-center gap-4">
-                    <img
-                      src={`${p.image}?t=${Date.now()}`} // ✅ cache fix
-                      className="w-14 h-14 object-cover rounded-xl"
-                    />
-                    <div>
-                      <p className="text-white font-bold">{p.name}</p>
-                      <p className="text-xs text-gray-400">{p.description}</p>
-                    </div>
-                  </td>
+  <td className="p-5 flex items-center gap-4">
+    <img
+      src={`${p.image}?t=${Date.now()}`}
+      className="w-14 h-14 object-cover rounded-xl"
+    />
+    <div>
+      <p className="text-white font-bold">{p.name}</p>
+      <p className="text-xs text-gray-400">
+        {/* Show category and short description */}
+        <span className="mr-2">Category: {p.category}</span>
+        {p.description.length > 50
+          ? p.description.slice(0, 50) + "..."
+          : p.description
+        }
+      </p>
+    </div>
+  </td>
 
-                  <td className="text-white font-semibold">₹{p.price}</td>
+  {/* Price: always required */}
+  <td className="text-white font-semibold">₹{p.price}</td>
 
-                  <td className={`${p.stock < 10 ? "text-red-400" : "text-green-400"}`}>
-                    {p.stock}
-                  </td>
+  {/* Stock: optional, show 0 if not set */}
+  <td className={`${!p.stock || p.stock < 10 ? "text-red-400" : "text-green-400"}`}>
+    {p.stock || 0}
+  </td>
 
-                  <td className="text-right pr-6 space-x-2">
-                    <button onClick={() => startEditing(p)}>
-                      <Edit3 className="inline text-gray-400 hover:text-white"/>
-                    </button>
+  <td className="text-right pr-6 space-x-2">
+    <button onClick={() => startEditing(p)}>
+      <Edit3 className="inline text-gray-400 hover:text-white"/>
+    </button>
+    <button onClick={() => deleteProduct(p.id)}>
+      <Trash2 className="inline text-gray-400 hover:text-red-400"/>
+    </button>
+  </td>
 
-                    <button onClick={() => deleteProduct(p.id)}>
-                      <Trash2 className="inline text-gray-400 hover:text-red-400"/>
-                    </button>
-                  </td>
-
-                </tr>
+</tr>
               ))
             )}
           </tbody>

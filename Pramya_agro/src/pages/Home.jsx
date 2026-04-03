@@ -1,7 +1,7 @@
 "use client";
 
 import { Link } from "react-router-dom";
-import { Leaf, Globe, User, Droplet, Sparkles, ArrowRight, ShoppingBag } from "lucide-react";
+import { Leaf, Globe, User, Droplet, Sparkles, ArrowRight } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, EffectFade, Pagination } from "swiper/modules";
 import CountUp from "react-countup";
@@ -13,8 +13,6 @@ import { useState, useEffect } from "react";
 import { useTheme } from "../context/ThemeContext";
 
 import home1 from "../assets/home1.png";
-import home2 from "../assets/home2.png";
-import home3 from "../assets/home3.png";
 
 export default function Home() {
   const [featuredProducts, setFeaturedProducts] = useState([]);
@@ -37,8 +35,7 @@ export default function Home() {
       className={`relative transition-colors duration-700 selection:bg-green-400 selection:text-white
       ${theme === "dark" ? "bg-[#020403] text-white" : "bg-[#FAF6F0] text-gray-900"}`}
     >
-      
-       {/* HERO SECTION */}
+      {/* HERO SECTION */}
       <section className="relative h-[100vh] w-full overflow-hidden">
         <Swiper
           modules={[Autoplay, EffectFade, Pagination]}
@@ -52,7 +49,7 @@ export default function Home() {
               <div className="relative w-full h-full overflow-hidden">
                 <img
                   src={img}
-                  alt="Organic Farm"
+                  alt="Organic Agro Farm"
                   className="w-full h-full object-cover scale-110 animate-pulse-slow"
                 />
                 <div
@@ -65,30 +62,28 @@ export default function Home() {
         </Swiper>
 
         <div className="absolute inset-0 z-10 flex flex-col justify-center px-6 md:px-24">
-          <div className="max-w-4xl space-y-6">
+          <div className="max-w-4xl space-y-6 text-center md:text-left">
             <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-green-400/20 backdrop-blur-xl border border-green-300/30 text-green-600 text-xs font-black uppercase tracking-[3px] animate-bounce-subtle">
-              <Sparkles size={14} /> 100% Organic & Fresh
+              <Sparkles size={14} /> 100% Organic Agro Solutions
             </div>
 
             <h1 className="text-6xl md:text-9xl font-black leading-[0.9] tracking-tighter">
-              <span className="text-white drop-shadow-2xl">FROM SOIL</span>
+              <span className="text-white drop-shadow-2xl">FROM FARM</span>
               <br />
               <span className="bg-gradient-to-r from-green-400 via-emerald-400 to-teal-400 bg-clip-text text-transparent">
-                TO SOUL.
+                TO FIELD.
               </span>
             </h1>
 
-            <p
-              className={`text-lg md:text-2xl max-w-2xl font-medium leading-relaxed
-              ${theme === "dark" ? "text-gray-300" : "text-gray-400"}`}
-            >
-              Pramay Agro brings sustainable, chemical-free farming directly to your table. Healthy food, happy planet.
+            <p className={`text-lg md:text-2xl max-w-2xl font-medium leading-relaxed
+              ${theme === "dark" ? "text-gray-300" : "text-gray-400"}`}>
+              Pramay Agro delivers advanced fertilizers, crop protection, and sustainable solutions to increase yield and soil health.
             </p>
 
-            <div className="flex flex-wrap gap-6 pt-4">
+            <div className="flex flex-wrap gap-6 pt-4 justify-center md:justify-start">
               <Link to="/products">
                 <button className="px-10 py-5 bg-green-500 text-white font-black rounded-full uppercase text-xs tracking-widest hover:bg-green-600 hover:scale-110 transition-all shadow-[0_0_50px_rgba(72,187,120,0.5)] flex items-center gap-3">
-                  Start Shopping <ArrowRight size={20} />
+                  Explore Products <ArrowRight size={20} />
                 </button>
               </Link>
             </div>
@@ -123,10 +118,8 @@ export default function Home() {
               <h3 className="text-4xl md:text-6xl font-black tracking-tighter">
                 <CountUp end={stat.value} duration={3} suffix={stat.suffix} />
               </h3>
-              <p
-                className={`text-xs font-bold uppercase tracking-widest mt-2
-                ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}
-              >
+              <p className={`text-xs font-bold uppercase tracking-widest mt-2
+                ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>
                 {stat.label}
               </p>
             </div>
@@ -134,7 +127,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* BENTO GRID / WHY PRAMAYA */}
+      {/* WHY PRAMAY */}
       <section className="py-32 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-end mb-20 gap-6">
@@ -144,7 +137,7 @@ export default function Home() {
               </h2>
               <p className={`font-bold uppercase tracking-widest text-sm 
                 ${theme === "dark" ? "text-gray-400" : "text-gray-600"}`}>
-                Bringing nature to your table.
+                Advanced Fertilizers & Crop Protection
               </p>
             </div>
           </div>
@@ -155,9 +148,9 @@ export default function Home() {
             <div className={`md:col-span-2 p-12 rounded-[3rem] relative overflow-hidden group shadow-2xl transition-all
               ${theme === "dark" ? "bg-gradient-to-tr from-green-700 to-teal-800 text-white" : "bg-gradient-to-tr from-green-400 to-emerald-400 text-white"}`}>
               <Leaf className="absolute -right-10 -bottom-10 text-white/10 scale-[5]" />
-              <h3 className="text-4xl font-black mb-6">Sustainable by Nature</h3>
+              <h3 className="text-4xl font-black mb-6">Sustainable Farming</h3>
               <p className="text-lg font-bold opacity-90 max-w-md">
-                Every product supports regenerative farming and a healthier planet.
+                Our fertilizers and pest solutions promote high yield, soil health, and eco-friendly agriculture.
               </p>
               <div className="mt-10 w-20 h-2 bg-white rounded-full" />
             </div>
@@ -165,18 +158,18 @@ export default function Home() {
             {/* Small Cards */}
             <div className={`p-10 rounded-[3rem] shadow-xl transition-transform hover:-translate-y-2
               ${theme === "dark" ? "bg-zinc-900 border-white/10 text-gray-300" : "bg-white border-gray-200 text-gray-900"} border`}>
-              <h3 className="text-2xl font-black mb-4 text-green-500">Smart Farming</h3>
+              <h3 className="text-2xl font-black mb-4 text-green-500">Smart Fertilizers</h3>
               <p className="text-sm leading-relaxed font-medium">
-                IoT sensors track water usage, growth, and yield to optimize organic farming sustainably.
+                Precision formulas for optimal crop growth with minimal chemical impact.
               </p>
             </div>
 
             <div className={`p-10 rounded-[3rem] shadow-2xl transition-all relative overflow-hidden
               ${theme === "dark" ? "bg-green-800 text-white" : "bg-green-700 text-white"}`}>
               <div className="absolute inset-0 bg-green-500/10 group-hover:bg-green-500/20 transition-all rounded-[3rem]" />
-              <h3 className="text-2xl font-black relative z-10">100% Traceable</h3>
+              <h3 className="text-2xl font-black relative z-10">Traceable Products</h3>
               <p className="text-sm font-medium mt-4 relative z-10">
-                Scan any product to see the farm, farmer, and harvest date.
+                Track every batch of fertilizer and pesticide directly from our farms to your fields.
               </p>
               <div className="mt-8 flex gap-2 relative z-10">
                 <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse" />
@@ -235,7 +228,6 @@ export default function Home() {
                       ${theme === "dark" ? "text-green-400" : "text-green-600"}`}>
                       ₹{product.price}
                     </span>
-                    
                   </div>
                 </div>
               </div>
@@ -251,14 +243,14 @@ export default function Home() {
           ${theme === "dark" ? "bg-green-800 text-white" : "bg-green-700 text-white"}`}>
           <div className="absolute top-0 right-0 w-96 h-96 bg-green-400/10 blur-[100px] rounded-full" />
           <h2 className="text-5xl md:text-8xl font-black tracking-tighter mb-8 px-4">
-            JOIN THE <span className="text-green-300">ORGANIC REVOLUTION</span>
+            JOIN THE <span className="text-green-300">AGRO REVOLUTION</span>
           </h2>
           <p className="text-gray-200 text-lg md:text-xl max-w-2xl mx-auto mb-12 font-medium">
-            15,000+ people have already chosen chemical-free, healthy products. What are you waiting for?
+            Thousands of farmers and growers trust Pramay Agro for safe, effective, and sustainable fertilizers and pest solutions.
           </p>
-          <Link to="/signup">
+          <Link to="/register">
             <button className="px-14 py-6 bg-green-400 text-white font-black rounded-full uppercase tracking-widest text-sm hover:bg-green-500 transition-all shadow-xl">
-              Get Access Now
+              Get Started
             </button>
           </Link>
         </div>

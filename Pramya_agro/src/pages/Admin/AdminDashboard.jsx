@@ -1,6 +1,5 @@
 import { useDashboardStats } from "../../hooks/userDashboardStats";
-import { Users, ShoppingBag, IndianRupee, TrendingUp } from "lucide-react"; // Icons install kara: npm install lucide-react
-
+import { Users, ShoppingBag, IndianRupee, TrendingUp } from "lucide-react"; 
 export default function AdminDashboard() {
   const { stats, loading } = useDashboardStats();
 

@@ -7,7 +7,7 @@ export function useDashboardStats(){
   const [loading,setLoading] = useState(true)
 
   useEffect(()=>{
-    API.get("api/admin/dashboard")
+    API.get("/admin/dashboard")
     .then(res=>{
       setStats(res.data)
     })

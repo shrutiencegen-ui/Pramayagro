@@ -27,6 +27,7 @@ export default function Navbar() {
     { to: "/products", label: "Products" },
     { to: "/hydroponics", label: "Hydroponics" },
     { to: "/blogs", label: "Blogs" },
+    { to: "/careers", label: "Careers" },
     { to: "/contact", label: "Contact" },
   ];
 

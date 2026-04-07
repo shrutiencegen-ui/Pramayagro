@@ -26,7 +26,9 @@ import MyOrders from "./pages/MyOrders";
 import { useTheme } from "./context/ThemeContext";
 import ScrollToTop from "./components/ScrollToTop";
 import WhyUs from "./pages/WhyUs";
-
+import ProductDetails from "./pages/ProductDetails";
+import CareerPage from "./pages/CareerPage";
+import AdminCarrer from "./pages/Admin/CareerAdmin";
 function App() {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith("/admin");
@@ -53,6 +55,8 @@ function App() {
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/orders" element={<MyOrders />} />
           <Route path="/why-us" element={<WhyUs />} />
+          <Route path="/products/:id" element={<ProductDetails />} />
+          <Route path="/careers" element={<CareerPage />} />
 
           <Route
             path="/cart"
@@ -77,6 +81,7 @@ function App() {
             <Route path="orders" element={<Orders />} />
             <Route path="products" element={<AdminProducts />} />
             <Route path="add-product" element={<AddProduct />} />
+            <Route path="careers" element={<AdminCarrer/>} /> {/* Placeholder for career admin */}
           </Route>
 
           {/* Auth routes */}

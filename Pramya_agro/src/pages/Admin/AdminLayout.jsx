@@ -27,6 +27,7 @@ export default function AdminLayout() {
     { to: "/admin/orders", label: "Orders", icon: <ShoppingBag size={20} /> },
     { to: "/admin/products", label: "Products", icon: <Package size={20} /> },
     { to: "/admin/add-product", label: "Add Product", icon: <PlusCircle size={20} /> },
+    { to: "/admin/careers", label: "Careers", icon: <Users size={20} /> } // Placeholder for career admin
   ];
 
   return (

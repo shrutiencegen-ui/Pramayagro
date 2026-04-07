@@ -23,11 +23,12 @@ class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text)
+    description_sections = db.Column(db.JSON)
     price = db.Column(db.Float, nullable=False)
     stock = db.Column(db.Integer, default=0)
     image = db.Column(db.String(300))
     category = db.Column(db.String(50), nullable=True) 
-    orders=db.relationship("OrderItem", backref="product", lazy=True)
+    orders=db.relationship("OrderItem", backref="product", lazy=True,cascade="all, delete-orphan")
 
 class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -55,3 +56,13 @@ class CartItem(db.Model):
 
     user = db.relationship("User", backref="cart_items")
     product = db.relationship("Product")
+
+
+class Career(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    role = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    requirements = db.Column(db.Text)
+    location = db.Column(db.String(100))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)

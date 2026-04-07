@@ -48,7 +48,7 @@ export default function Login() {
     if (!validate()) return;
 
     try {
-      const res = await API.post("api/login", form);
+      const res = await API.post("/login", form);
       login(res.data.user, res.data.token);
 
       if (res.data.user.role === "admin") navigate("/admin");

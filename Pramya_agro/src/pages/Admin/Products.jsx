@@ -32,10 +32,11 @@ export default function Products() {
 
   const fetchProducts = () => {
     setLoading(true);
-    API.get("api/products")
+    API.get("/admin/products")
       .then((res) => setProducts(res.data))
       .catch((err) => console.error(err))
       .finally(() => setLoading(false));
+      console.log("BASE URL:", API.defaults.baseURL);
   };
 
   // ✅ DELETE
@@ -96,6 +97,7 @@ export default function Products() {
       formData.append("description", editForm.description);
       formData.append("price", editForm.price);
       formData.append("stock", editForm.stock);
+      formData.append("category", editForm.category);
 
       if (editImageFile) {
         formData.append("image", editImageFile);
@@ -169,7 +171,7 @@ export default function Products() {
   <td className="p-5 flex items-center gap-4">
     <img
       src={`${p.image}?t=${Date.now()}`}
-      className="w-14 h-14 object-cover rounded-xl"
+      className="w-14 h-14 object-contain rounded-xl"
     />
     <div>
       <p className="text-white font-bold">{p.name}</p>
@@ -240,44 +242,68 @@ export default function Products() {
 
             {/* FORM */}
             <div className="space-y-3">
-              <input
-                name="name"
-                value={editForm.name}
-                onChange={handleEditChange}
-                className="w-full p-3 rounded-xl bg-gray-800 text-white"
-              />
 
-              <input
-                name="description"
-                value={editForm.description}
-                onChange={handleEditChange}
-                className="w-full p-3 rounded-xl bg-gray-800 text-white"
-              />
+  {/* NAME */}
+  <input
+    name="name"
+    value={editForm.name || ""}
+    onChange={handleEditChange}
+    placeholder="Enter product name"
+    className="w-full p-3 rounded-xl bg-gray-800 text-white placeholder-gray-400"
+  />
 
-              <div className="flex gap-3">
-                <input
-                  name="price"
-                  value={editForm.price}
-                  onChange={handleEditChange}
-                  className="w-1/2 p-3 rounded-xl bg-gray-800 text-white"
-                />
+  {/* DESCRIPTION */}
+  <textarea
+    name="description"
+    value={editForm.description || ""}
+    onChange={handleEditChange}
+    placeholder="Enter product description"
+    className="w-full p-3 rounded-xl bg-gray-800 text-white placeholder-gray-400"
+  />
 
-                <input
-                  name="stock"
-                  value={editForm.stock}
-                  onChange={handleEditChange}
-                  className="w-1/2 p-3 rounded-xl bg-gray-800 text-white"
-                />
-              </div>
+  {/* CATEGORY */}
+  <select
+    name="category"
+    value={editForm.category || ""}
+    onChange={handleEditChange}
+    className="w-full p-3 rounded-xl bg-gray-800 text-white"
+  >
+    <option value="">Select Category</option>
+    <option value="Adjuvant">Adjuvant</option>
+    <option value="Micronutrient">Micronutrient</option>
+    <option value="Fertilizer">Fertilizer</option>
+    <option value="Bio Stimulant">Bio Stimulant</option>
+  </select>
 
-              <button
-                onClick={saveEdit}
-                disabled={saving}
-                className="w-full mt-4 bg-emerald-500 p-3 rounded-xl text-white font-semibold hover:bg-emerald-600 disabled:opacity-50"
-              >
-                {saving ? "Saving..." : "Save Changes"}
-              </button>
-            </div>
+  {/* PRICE + STOCK */}
+  <div className="flex gap-3">
+    <input
+      name="price"
+      value={editForm.price || ""}
+      onChange={handleEditChange}
+      placeholder="Price"
+      className="w-1/2 p-3 rounded-xl bg-gray-800 text-white placeholder-gray-400"
+    />
+
+    <input
+      name="stock"
+      value={editForm.stock || ""}
+      onChange={handleEditChange}
+      placeholder="Stock"
+      className="w-1/2 p-3 rounded-xl bg-gray-800 text-white placeholder-gray-400"
+    />
+  </div>
+
+  {/* BUTTON */}
+  <button
+    onClick={saveEdit}
+    disabled={saving}
+    className="w-full mt-4 bg-emerald-500 p-3 rounded-xl text-white font-semibold hover:bg-emerald-600 disabled:opacity-50"
+  >
+    {saving ? "Saving..." : "Save Changes"}
+  </button>
+
+</div>
 
           </div>
         </div>

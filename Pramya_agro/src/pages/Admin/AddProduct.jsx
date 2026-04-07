@@ -1,18 +1,23 @@
 import { useState } from "react";
 import API from "../../services/api";
-import { 
-  PackagePlus, Tag, AlignLeft, IndianRupee, 
-  Layers, Image as ImageIcon, Loader2, CheckCircle2, AlertCircle, Upload
+import {
+  PackagePlus, Tag, AlignLeft, IndianRupee,
+  Layers, Image as ImageIcon, Loader2,
+  CheckCircle2, AlertCircle, Upload, Trash2
 } from "lucide-react";
 
-export default function AddProduct() {
+export default function AddProduct({ onProductAdded }) {
   const [form, setForm] = useState({
     name: "",
-    description: "",
+    description_sections: [
+      { title: "Composition", content: "" },
+      { title: "Benefits", content: "" },
+      { title: "Dosage", content: "" },
+    ],
     price: "",
-    stock: "",       // optional now
-    category: "Adjuvant", // Default to agro category
-    image: null      // optional now
+    stock: "",
+    category: "Adjuvant",
+    image: null
   });
 
   const [errors, setErrors] = useState({});
@@ -23,11 +28,12 @@ export default function AddProduct() {
   const validate = () => {
     let newErrors = {};
     if (!form.name.trim()) newErrors.name = "Product name is required";
-    if (!form.description.trim()) newErrors.description = "Description is required";
-    if (!form.price || form.price <= 0) newErrors.price = "Enter a valid price";
-    // Stock optional: no validation
-    // Image optional: no validation
-    
+    if (!form.price || form.price <= 0) newErrors.price = "Enter valid price";
+
+    form.description_sections.forEach((sec, idx) => {
+      if (!sec.content.trim()) newErrors[`desc_${idx}`] = `${sec.title} required`;
+    });
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -35,7 +41,12 @@ export default function AddProduct() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm({ ...form, [name]: value });
-    if (errors[name]) setErrors({ ...errors, [name]: null });
+  };
+
+  const handleSectionChange = (i, value) => {
+    const updated = [...form.description_sections];
+    updated[i].content = value;
+    setForm({ ...form, description_sections: updated });
   };
 
   const handleImageChange = (e) => {
@@ -43,7 +54,6 @@ export default function AddProduct() {
     if (file) {
       setForm({ ...form, image: file });
       setImagePreview(URL.createObjectURL(file));
-      if (errors.image) setErrors({ ...errors, image: null });
     }
   };
 
@@ -56,172 +66,180 @@ export default function AddProduct() {
 
     const formData = new FormData();
     formData.append("name", form.name);
-    formData.append("description", form.description);
     formData.append("price", form.price);
-    if (form.stock) formData.append("stock", form.stock);  // optional
+    formData.append("stock", form.stock);
     formData.append("category", form.category);
-    if (form.image) formData.append("image", form.image); // optional
+    formData.append("description_sections", JSON.stringify(form.description_sections));
+    if (form.image) formData.append("image", form.image);
 
     try {
-      const token = localStorage.getItem("token"); 
-
-      await API.post("/api/admin/products", formData, {
+      const token = localStorage.getItem("token");
+      const res = await API.post("/admin/products", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
-          "Authorization": `Bearer ${token}`
+          Authorization: `Bearer ${token}`
         }
       });
-      
-      setStatus('success');
-      setForm({ name: "", description: "", price: "", stock: "", category: "Adjuvant", image: null });
+
+      setStatus("success");
+      setForm({
+        name: "",
+        description_sections: [
+          { title: "Composition", content: "" },
+          { title: "Benefits", content: "" },
+          { title: "Dosage", content: "" },
+        ],
+        price: "",
+        stock: "",
+        category: "Adjuvant",
+        image: null
+      });
       setImagePreview(null);
-    } catch (err) {
-      console.error("Error details:", err.response?.data);
-      setStatus('error');
+
+      if (onProductAdded) onProductAdded(res.data);
+    } catch {
+      setStatus("error");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="max-w-4xl mx-auto pb-20">
+    <div className="max-w-6xl mx-auto pb-20">
+      
+      {/* Header */}
       <div className="flex items-center gap-4 mb-10">
-        <div className="p-3 bg-emerald-500/10 rounded-2xl border border-emerald-500/20 text-emerald-400">
-          <PackagePlus size={32} />
+        <div className="p-4 bg-emerald-500/10 rounded-2xl text-emerald-400">
+          <PackagePlus size={30} />
         </div>
         <div>
-          <h1 className="text-3xl font-bold text-white tracking-tight">Add New Product</h1>
-          <p className="text-gray-400 text-sm">Add agro products with price and category.</p>
+          <h1 className="text-3xl font-bold text-white">Add Product</h1>
+          <p className="text-gray-400 text-sm">Create and manage agro products</p>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-white/[0.02] border border-white/10 p-8 rounded-[2.5rem] backdrop-blur-xl shadow-2xl space-y-8">
-        
-        {status === 'success' && <StatusMsg type="success" text="Product added successfully!" />}
-        {status === 'error' && <StatusMsg type="error" text="Failed to add product. Check server." />}
+      <form onSubmit={handleSubmit} className="space-y-8">
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Left Side: Basic Info */}
-          <div className="space-y-6">
-            <InputGroup 
-              label="Product Name" name="name" icon={<Tag size={18} />} 
-              value={form.name} onChange={handleChange} error={errors.name}
-              placeholder="e.g. बंधन / व्हिक्टरी झिंक EDTA"
-            />
+        {status === "success" && <StatusMsg type="success" text="Product added!" />}
+        {status === "error" && <StatusMsg type="error" text="Something went wrong!" />}
 
-            <InputGroup 
-              label="Price (₹)" name="price" type="number" icon={<IndianRupee size={18} />} 
-              value={form.price} onChange={handleChange} error={errors.price}
-              placeholder="250"
-            />
+        <div className="grid lg:grid-cols-3 gap-8">
 
-            <InputGroup 
-              label="Stock (optional)" name="stock" type="number" icon={<Layers size={18} />} 
-              value={form.stock} onChange={handleChange} error={errors.stock}
-              placeholder="e.g. 500"
-            />
+          {/* LEFT CONTENT */}
+          <div className="lg:col-span-2 space-y-6">
 
-            <div className="space-y-2 text-white">
-              <label className="text-xs font-bold uppercase tracking-widest text-gray-500 ml-1 flex items-center gap-2">
-                <AlignLeft size={14} /> Description
-              </label>
-              <textarea
-                name="description" rows="4" value={form.description} onChange={handleChange}
-                placeholder="Describe product composition, benefits, dosage..."
-                className={`w-full p-4 bg-white/[0.03] border ${errors.description ? 'border-red-500/50' : 'border-white/10'} rounded-2xl focus:outline-none focus:border-emerald-500/50 transition-all resize-none`}
-              />
-              {errors.description && <p className="text-red-500 text-[10px] font-bold mt-1 ml-1 uppercase">{errors.description}</p>}
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-widest text-gray-500 ml-1 flex items-center gap-2">
-                <Tag size={14} /> Category
-              </label>
-              <div className="relative">
-                <select
-                  name="category"
-                  value={form.category}
-                  onChange={handleChange}
-                  className="w-full appearance-none p-4 pr-12 bg-white/[0.03] border border-white/10 rounded-2xl text-white focus:outline-none focus:border-emerald-500/50 transition-all cursor-pointer hover:bg-white/[0.05]"
-                >
-                  <option value="Adjuvant" className="bg-[#0b0f0f]">Adjuvant</option>
-                  <option value="Micronutrient" className="bg-[#0b0f0f]">Micronutrient</option>
-                  <option value="Fertilizer" className="bg-[#0b0f0f]">Fertilizer</option>
-                  <option value="Bio Stimulant" className="bg-[#0b0f0f]">Bio Stimulant</option>
-                  <option value="Plant Growth" className="bg-[#0b0f0f]">Plant Growth</option>
-                </select>
-                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">▼</div>
+            {/* BASIC INFO */}
+            <Card title="Basic Info">
+              <div className="grid sm:grid-cols-2 gap-4">
+                <Input label="Product Name" name="name" value={form.name} onChange={handleChange} error={errors.name} className="sm:col-span-2" />
+                <Input label="Price (₹)" name="price" type="number" value={form.price} onChange={handleChange} error={errors.price} />
+                <Input label="Stock" name="stock" type="number" value={form.stock} onChange={handleChange} />
+                
               </div>
-            </div>
+            </Card>
+
+            {/* DESCRIPTION */}
+            <Card title="Description Sections">
+              <div className="grid sm:grid-cols-3 gap-4">
+                {form.description_sections.map((sec, i) => (
+                  <div key={i}>
+                    <p className="text-sm text-gray-400 mb-1">{sec.title}</p>
+                    <textarea
+                      rows={3}
+                      value={sec.content}
+                      onChange={(e) => handleSectionChange(i, e.target.value)}
+                      className="w-full p-3 bg-white/[0.03] border border-white/10 rounded-xl text-white text-sm"
+                    />
+                  </div>
+                ))}
+              </div>
+            </Card>
+
+            {/* CATEGORY */}
+            <Card title="Category">
+              <select
+                name="category"
+                value={form.category}
+                onChange={handleChange}
+                className="w-full p-3 bg-white/[0.03] border border-white/10 rounded-xl text-white"
+              >
+                <option>Adjuvant</option>
+                <option>Micronutrient</option>
+                <option>Fertilizer</option>
+                <option>Bio Stimulant</option>
+                <option>Plant Growth</option>
+              </select>
+            </Card>
+
           </div>
 
-          {/* Right Side: Image Upload (optional) */}
-          <div className="space-y-4">
-            <label className="text-xs font-bold uppercase tracking-widest text-gray-500 ml-1 flex items-center gap-2">
-              <ImageIcon size={14} /> Product Image (optional)
-            </label>
-            <div className={`relative group border-2 border-dashed ${errors.image ? 'border-red-500/30' : 'border-white/10'} rounded-[2rem] overflow-hidden h-[300px] flex items-center justify-center bg-white/[0.02] hover:bg-white/[0.04] transition-all`}>
-              {imagePreview ? (
-                <>
-                  <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all">
-                    <button type="button" onClick={() => setImagePreview(null)} className="bg-red-500 p-2 rounded-full text-white">
-                       <Trash2 size={20} />
+          {/* RIGHT SIDE IMAGE */}
+          <div>
+            <Card title="Product Image">
+              <div className="border-2 border-dashed border-white/10 rounded-2xl h-[260px] flex items-center justify-center relative group">
+                {imagePreview ? (
+                  <>
+                    <img src={imagePreview} className="h-full object-contain" />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setImagePreview(null);
+                        setForm({ ...form, image: null });
+                      }}
+                      className="absolute top-2 right-2 bg-red-500 p-2 rounded-full"
+                    >
+                      <Trash2 size={16} />
                     </button>
-                  </div>
-                </>
-              ) : (
-                <label className="cursor-pointer flex flex-col items-center gap-3">
-                  <div className="p-4 bg-emerald-500/10 rounded-full text-emerald-400 group-hover:scale-110 transition-all">
-                    <Upload size={24} />
-                  </div>
-                  <span className="text-gray-400 text-sm font-medium text-center px-6">Click to upload product photo (optional)</span>
-                  <input type="file" className="hidden" accept="image/*" onChange={handleImageChange} />
-                </label>
-              )}
-            </div>
+                  </>
+                ) : (
+                  <label className="cursor-pointer text-center">
+                    <Upload className="mx-auto mb-2 text-emerald-400" />
+                    <p className="text-gray-400 text-sm">Upload Image</p>
+                    <input type="file" hidden onChange={handleImageChange} />
+                  </label>
+                )}
+              </div>
+            </Card>
           </div>
         </div>
 
-        <button 
-          disabled={isSubmitting}
-          className={`w-full py-4 rounded-2xl font-bold text-black transition-all duration-300 flex items-center justify-center gap-3 shadow-lg shadow-emerald-500/20
-            ${isSubmitting ? 'bg-emerald-700' : 'bg-emerald-500 hover:bg-emerald-400 hover:scale-[1.01]'}`}
-        >
-          {isSubmitting ? <><Loader2 className="animate-spin" size={20} /> Saving Product...</> : "Publish Product"}
+        {/* SUBMIT */}
+        <button className="w-full py-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 font-bold text-black flex justify-center items-center gap-2">
+          {isSubmitting ? <Loader2 className="animate-spin" /> : "Publish Product"}
         </button>
       </form>
     </div>
   );
 }
 
-// Sub-components
-function InputGroup({ label, icon, error, ...props }) {
+/* COMPONENTS */
+
+function Card({ title, children }) {
   return (
-    <div className="space-y-2">
-      <label className="text-xs font-bold uppercase tracking-widest text-gray-500 ml-1 flex items-center gap-2">
-        {icon} {label}
-      </label>
+    <div className="bg-white/[0.03] border border-white/10 p-5 rounded-2xl backdrop-blur-xl">
+      <h2 className="text-white font-semibold mb-4">{title}</h2>
+      {children}
+    </div>
+  );
+}
+
+function Input({ label, error, className = "", ...props }) {
+  return (
+    <div className={className}>
+      <p className="text-xs text-gray-400 mb-1">{label}</p>
       <input
         {...props}
-        className={`w-full p-4 bg-white/[0.03] border ${error ? 'border-red-500/50' : 'border-white/10'} rounded-2xl text-white placeholder:text-gray-600 focus:outline-none focus:border-emerald-500/50 transition-all`}
+        className={`w-full p-3 bg-white/[0.03] border ${error ? "border-red-500" : "border-white/10"} rounded-xl text-white`}
       />
-      {error && <p className="text-red-500 text-[10px] font-bold mt-1 ml-1 uppercase">{error}</p>}
+      {error && <p className="text-red-400 text-xs">{error}</p>}
     </div>
   );
 }
 
 function StatusMsg({ type, text }) {
   return (
-    <div className={`flex items-center gap-3 p-4 ${type === 'success' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20'} border rounded-2xl animate-in fade-in slide-in-from-top-2`}>
-      {type === 'success' ? <CheckCircle2 size={20} /> : <AlertCircle size={20} />}
-      <span className="font-medium text-sm">{text}</span>
+    <div className={`p-3 rounded-xl text-sm ${type === "success" ? "bg-green-500/10 text-green-400" : "bg-red-500/10 text-red-400"}`}>
+      {text}
     </div>
   );
 }
-
-const Trash2 = ({ size }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2M10 11v6M14 11v6"/>
-  </svg>
-);

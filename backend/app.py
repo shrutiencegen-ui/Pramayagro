@@ -12,6 +12,9 @@ import json
 import cloudinary
 import cloudinary.uploader
 from dotenv import load_dotenv
+import razorpay
+from flask_migrate import Migrate
+
 
 
 load_dotenv()
@@ -23,7 +26,7 @@ app.register_blueprint(cart_bp, url_prefix='/api/cart')
 
 bcrypt.init_app(app)
 jwt = JWTManager(app)
-
+migrate = Migrate(app, db)
 # cloudinary
 cloudinary.config(
     cloud_name=os.environ.get("CLOUDINARY_CLOUD_NAME"),
@@ -32,6 +35,10 @@ cloudinary.config(
     secure=True
 )
 
+RAZORPAY_KEY_ID = ""
+RAZORPAY_KEY_SECRET = ""
+
+client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
 
 BASE_URL = os.environ.get("BASE_URL", "http://localhost:5000")
 CORS(app, resources={
@@ -48,21 +55,11 @@ db.init_app(app)
 with app.app_context():
     db.create_all()
 
-@app.route('/api/<path:path>', methods=["OPTIONS"])
-def handle_options(path):
-    response = app.make_response("")
-    response.headers.add("Access-Control-Allow-Origin", "http://localhost:5173")
-    response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization")
-    response.headers.add("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS")
-    response.headers.add("Access-Control-Allow-Credentials", "true")
-    return response
+razorpay_client = razorpay.Client(
+    auth=(os.environ.get("RAZORPAY_KEY_ID"), os.environ.get("RAZORPAY_KEY_SECRET"))
+)
 
-@app.after_request
-def after_request(response):
-    response.headers.add("Access-Control-Allow-Origin", "http://localhost:5173")
-    response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization")
-    response.headers.add("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS")
-    return response
+
 # ✅ HELPER FUNCTION FOR IMAGE URL (Cloudinary vs Local)
 def get_image_url(image_name):
     if not image_name:
@@ -82,7 +79,7 @@ def uploaded_file(filename):
 
 
 # ---------------- REGISTER ----------------
-@app.route("/register", methods=["POST"])
+@app.route("/api/register", methods=["POST"])
 def register():
     data = request.json
 
@@ -120,13 +117,16 @@ def login():
     if not user.check_password(password):
         return jsonify({"msg": "Incorrect password"}), 401
 
+    # 2 days in seconds = 2 * 24 * 60 * 60
+    expires_delta = timedelta(days=2)
+
     access_token = create_access_token(
-        identity=str(user.id), 
-        additional_claims={"role": user.role}
+        identity=str(user.id),
+        additional_claims={"role": user.role},
+        expires_delta=expires_delta  # <-- token valid for 2 days
     )
-    
-    expires = datetime.utcnow() + timedelta(seconds=3600)
-    
+
+    expires = datetime.utcnow() + expires_delta  # For frontend info
 
     return jsonify({
         "token": access_token,
@@ -138,8 +138,33 @@ def login():
             "role": user.role
         }
     })
+# delete user
+@app.route("/api/admin/users/<int:user_id>", methods=["DELETE"])
+@jwt_required()
+def delete_user(user_id):
+    claims = get_jwt()
+    
+    # Only admins can delete users
+    if claims.get("role") != "admin":
+        return jsonify({"msg": "Unauthorized"}), 403
 
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({"msg": "User not found"}), 404
 
+    # Optional: Prevent deleting another admin
+    if user.role == "admin":
+        return jsonify({"msg": "Cannot delete another admin"}), 403
+
+    user_name = user.name  # Save name for frontend feedback
+
+    try:
+        db.session.delete(user)
+        db.session.commit()
+        return jsonify({"msg": f"User '{user_name}' deleted successfully"})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"msg": "Failed to delete user", "error": str(e)}), 500
 # ---------------- GET PRODUCTS ----------------
 @app.route("/api/admin/products", methods=["GET"])
 def get_products():
@@ -292,7 +317,7 @@ def admin_dashboard():
     total_orders = Order.query.count()
 
     total_revenue = db.session.query(
-        db.func.coalesce(db.func.sum(Order.total_price), 0)
+        db.func.coalesce(db.func.sum(Order.total), 0)
     ).scalar()
 
     return jsonify({
@@ -334,40 +359,48 @@ def get_users():
         "total": users_pagination.total
     })
 
-#get orders 
+# get orders 
 @app.route("/api/admin/orders", methods=["GET"])
 @jwt_required()
 def admin_get_orders():
-    claims = get_jwt()
+    try:
+        orders = Order.query.order_by(Order.created_at.desc()).all()
+        orders_list = []
+        
+        for o in orders:
+            # User cha naav m मिळवण्यासाठी safe logic
+            user_display_name = "Unknown User"
+            if o.user:
+                # Jar tumchya model madhye 'name' column asel tar o.user.name vapra
+                user_display_name = getattr(o.user, 'name', getattr(o.user, 'username', 'User'))
 
-    if claims["role"] != "admin":
-        return jsonify({"msg": "Admin access only"}), 403
+            order_data = {
+                "id": o.id,
+                "user": user_display_name, 
+                "status": getattr(o, 'status', 'Pending'),
+                "total_price": o.total, 
+                "createdAt": o.created_at.strftime("%Y-%m-%d %H:%M") if o.created_at else None,
+                "products": []
+            }
+            
+            for item in o.items:
+                if item.product: # Product delete jhala asel tar error nako mhanun check
+                    order_data["products"].append({
+                        "product_id": item.product.id,
+                        "name": item.product.name,
+                        "price": item.price,
+                        "quantity": item.quantity,
+                        "image": get_image_url(item.product.image)
+                    })
+            
+            orders_list.append(order_data)
+            
+        return jsonify(orders_list), 200
 
-    orders = Order.query.order_by(Order.created_at.desc()).all()
-
-    data = []
-
-    for o in orders:
-        data.append({
-            "id": o.id,
-            "user": o.user.email,
-            "status": o.status,
-            "total_price": o.total_price,
-            "createdAt": o.created_at.strftime("%Y-%m-%d"),
-            "products": [
-                {
-                    "product_id": item.product.id,
-                    "name": item.product.name,
-                    "price": item.price,
-                    "quantity": item.quantity,
-                    "image": get_image_url(item.product.image)
-                }
-                for item in o.items
-            ]
-        })
-
-    return jsonify(data)
-
+    except Exception as e:
+        print(f"Admin Orders Error: {str(e)}")
+        return jsonify({"msg": "Internal Server Error", "error": str(e)}), 500
+   
 #Update orders
 @app.route("/api/admin/orders/<int:id>", methods=["PUT"])
 @jwt_required()
@@ -419,68 +452,183 @@ def getall_products():
 
     return jsonify(data)
 
-# ---------------- SEARCH PRODUCTS ----------------
-@app.route("/api/products/search", methods=["GET"])
-def search_products():
-    q = request.args.get("q", "").strip().lower()
-    if not q:
-        return jsonify([])
+# ---------------- CREATE RAZORPAY ORDER ----------------
+@app.route("/api/payment/create-order", methods=["POST"])
+def create_razorpay_order():
+    data = request.json
+    amount = data.get("amount")
+    if not amount:
+        return jsonify({"msg": "Amount is required"}), 400
 
-    products = Product.query.filter(Product.name.ilike(f"%{q}%")).all()
-
-    data = []
-    for p in products:
-        data.append({
-            "id": p.id,
-            "name": p.name,
-            "description": p.description,
-            "price": p.price,
-            "stock": p.stock,
-            "category": p.category,
-            "image": get_image_url(p.image)
-        })
-
-    return jsonify(data)
-
-@app.route("/api/orders", methods=["POST"])
+    order = razorpay_client.order.create({
+        "amount": int(amount * 100),  # in paise
+        "currency": "INR",
+        "payment_capture": 1
+    })
+    return jsonify(order)
+# ---------------- VERIFY PAYMENT ----------------
+@app.route("/api/payment/verify", methods=["POST"])
 @jwt_required()
-def create_order():
+def verify_payment():
     user_id = get_jwt_identity()
     data = request.json
-
     try:
+        razorpay_client.utility.verify_payment_signature({
+            "razorpay_order_id": data["razorpay_order_id"],
+            "razorpay_payment_id": data["razorpay_payment_id"],
+            "razorpay_signature": data["razorpay_signature"]
+        })
+        print("Payment Signature Verified Successfully ✅")
+
+        address = data.get("address")
+        total_price = data.get("total")
+        products_data = data.get("products", [])
+        payment_id = data.get("razorpay_payment_id")
+
         new_order = Order(
             user_id=user_id,
-            payment_method=data.get("payment"), 
-            address=json.dumps(data.get("address")),
-            total_price=float(data.get("total")) 
+            payment_method="ONLINE",
+            payment_id=payment_id,
+            address=json.dumps(address),
+            total=float(total_price),
+            status="Paid"  
         )
+        
         db.session.add(new_order)
-        db.session.flush() 
+        db.session.flush()  
 
-        for p in data.get("products", []):
-            item_price = p.get("price")
-            if not item_price:
-                product_record = Product.query.get(p["productId"])
-                item_price = product_record.price
+        for p in products_data:
+           
+            p_id = p.get("productId") or p.get("id")
+            if not p_id:
+                continue
 
             order_item = OrderItem(
                 order_id=new_order.id,
-                product_id=p["productId"],
-                quantity=p["quantity"],
+                product_id=p_id,
+                quantity=p.get("quantity", 1),
+                price=p.get("price")
+            )
+            db.session.add(order_item)
+
+        if not data.get("buyNow", False):
+            CartItem.query.filter_by(user_id=user_id).delete()
+
+        db.session.commit()
+        return jsonify({
+            "msg": "Payment verified and order placed successfully 🎉",
+            "order_id": new_order.id
+        }), 201
+
+    except Exception as e:
+        db.session.rollback()
+        print(f"Verification/Order Error: {str(e)}")
+        return jsonify({"msg": "Payment verification failed or server error", "error": str(e)}), 400
+
+
+@app.route('/api/<path:path>', methods=["OPTIONS"])
+def handle_all_options(path):
+    return handle_options(path)
+
+
+#Placed order
+@app.route("/api/orders", methods=["POST"])
+@jwt_required()
+def place_order():
+    user_id = get_jwt_identity()
+    data = request.json
+    print("Order payload:", data)  # <-- Debug: see what frontend sends
+
+    try:
+        payment_method = data.get("payment")
+        total_price = data.get("total")
+        products_data = data.get("products", [])
+        address = data.get("address", {})
+
+        if not payment_method or not total_price or not products_data:
+            return jsonify({"msg": "Payment method, total, and products are required"}), 400
+
+        new_order = Order(
+            user_id=user_id,
+            payment_method=payment_method,
+            payment_id=data.get("paymentId") if payment_method == "ONLINE" else None,
+            address=json.dumps(address),
+            total=float(total_price)
+        )
+        db.session.add(new_order)
+        db.session.flush()
+
+        for p in products_data:
+            product_id = p.get("productId")
+            if not product_id:
+                print("Warning: productId missing in item:", p)
+                continue
+
+            product = Product.query.get(product_id)
+            if not product:
+                print(f"Warning: Product ID {product_id} not found, skipping.")
+                continue
+
+            quantity = p.get("quantity", 1)
+            item_price = p.get("price") or product.price
+
+            order_item = OrderItem(
+                order_id=new_order.id,
+                product_id=product.id,
+                quantity=quantity,
                 price=item_price
             )
             db.session.add(order_item)
 
-        CartItem.query.filter_by(user_id=user_id).delete()
-        
+        if not data.get("buyNow", False):
+            CartItem.query.filter_by(user_id=user_id).delete()
+
         db.session.commit()
         return jsonify({"msg": "Order placed successfully", "order_id": new_order.id}), 201
 
     except Exception as e:
         db.session.rollback()
-        print(f"Error creating order: {str(e)}") 
-        return jsonify({"msg": "Server error while placing order"}), 500
+        print(f"Error creating order for user {user_id}: {str(e)}")
+        return jsonify({"msg": "Server error while placing order", "error": str(e)}), 500
+ # Global Search API  
+@app.route("/api/global-search", methods=["GET"])
+def global_search():
+    query = request.args.get('q', '').lower()
+    if not query:
+        return jsonify([])
+
+    results = []
+
+   
+    products = Product.query.filter(Product.name.ilike(f'%{query}%')).all()
+    for p in products:
+        results.append({
+            "id": p.id, 
+            "name": p.name, 
+            "type": "product", 
+            "link": f"/products/{p.id}"
+        })
+
+   
+    static_pages = [
+        {"name": "About Us", "link": "/about"},
+        {"name": "Hydroponics", "link": "/hydroponics"},
+        {"name": "Contact Us", "link": "/contact"},
+        {"name": "Careers", "link": "/careers"},
+        {"name": "Blogs", "link": "/blogs"}
+    ]
+    
+    for page in static_pages:
+        if query in page['name'].lower():
+            results.append({
+                "id": page['link'], 
+                "name": page['name'], 
+                "type": "page", 
+                "link": page['link']
+            })
+
+    return jsonify(results[:10]) 
+
 
 #product detail 
 # ---------------- GET SINGLE PRODUCT ----------------
@@ -521,27 +669,38 @@ def get_single_product(product_id):
 @app.route("/api/orders", methods=["GET"])
 @jwt_required()
 def get_orders():
-    user_id = get_jwt_identity()
-    orders = Order.query.filter_by(user_id=user_id).order_by(Order.created_at.desc()).all()
-    data = []
-    for o in orders:
-        data.append({
-            "id": o.id,
-            "status": o.status,
-            "payment": o.payment_method,
-            "total": o.total_price,
-            "createdAt": o.created_at.strftime("%Y-%m-%d"),
-            "products": [
-                {
+    try:
+        user_id = get_jwt_identity()
+        # Ensure user_id is integer if needed
+        orders = Order.query.filter_by(user_id=user_id).order_by(Order.created_at.desc()).all()
+        
+        data = []
+        for o in orders:
+            order_data = {
+                "id": o.id,
+                "status": o.status or "Pending",
+                "payment": o.payment_method, # <--- Model madhye payment_method asel tar he barobar aahe
+                "total": o.total,            # <--- 'total_price' chya jagi fkt 'total' (Model pramane)
+                "createdAt": o.created_at.strftime("%Y-%m-%d") if o.created_at else None,
+                "products": []
+            }
+            
+            for item in o.items:
+                order_data["products"].append({
                     "product_id": item.product.id,
                     "name": item.product.name,
                     "price": item.price,
                     "quantity": item.quantity,
                     "image": get_image_url(item.product.image)
-                } for item in o.items
-            ]
-        })
-    return jsonify(data)
+                })
+            data.append(order_data)
+            
+        return jsonify(data), 200
+
+    except Exception as e:
+        print(f"Error fetching orders: {str(e)}")
+        return jsonify({"msg": "Server error", "error": str(e)}), 500
+  
 
 from collections import Counter
 
@@ -549,7 +708,7 @@ from collections import Counter
 def get_stats():
     total_users = User.query.filter_by(role="user").count()
     orders = Order.query.all()
-    total_revenue = sum(order.total_price for order in orders)
+    total_revenue = sum(order.total for order in orders)
     
     product_counts = Counter()
     product_revenue = Counter()

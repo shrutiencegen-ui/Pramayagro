@@ -10,6 +10,7 @@ import home2 from "../assets/home2.png";
 import farm from "../assets/farm.jpg";
 import farm3 from "../assets/farm3.png";
 import hydrop from "../assets/hydrop.png";
+import { useNavigate } from "react-router-dom";
 
 export default function WhyUs() {
   const { theme } = useTheme();
@@ -32,6 +33,19 @@ export default function WhyUs() {
     { name: "Sneha Joshi", text: "Hydroponics is the future. Loved it!" },
     { name: "Amit Kulkarni", text: "Amazing quality and taste." },
   ];
+  const navigate = useNavigate();
+
+  const handleGetStarted = () => {
+    const token = localStorage.getItem("token"); // check if user is logged in
+
+    if (token) {
+      // User already logged in → dashboard
+      navigate("/"); 
+    } else {
+      // Not logged in → register page
+      navigate("/register");
+    }
+  };
 
   const sectionBg = theme === "dark" ? "bg-[#030504] text-white" : "bg-gradient-to-br from-green-50 via-green-100 to-green-50 text-gray-900";
 
@@ -231,6 +245,8 @@ export default function WhyUs() {
         <h2 className="text-4xl font-bold mb-4">Experience Smart Farming</h2>
         <p className="mb-8 text-gray-500 dark:text-gray-400">Join Pramay Agro and embrace the future.</p>
         <motion.button
+          onClick={handleGetStarted} // <-- use this
+
           whileHover={{ scale: 1.1 }}
           className={`px-10 py-4 rounded-full font-bold transition-all shadow-lg
             ${theme === "dark" ? "bg-emerald-500 text-black hover:bg-emerald-400" : "bg-green-600 text-white hover:bg-green-500"}`}

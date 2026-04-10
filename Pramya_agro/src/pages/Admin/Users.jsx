@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import API from "../../services/api";
-import { ChevronLeft, ChevronRight, Mail, ShieldCheck, User as UserIcon } from "lucide-react";
+import { ChevronLeft, ChevronRight, Mail, ShieldCheck, User as UserIcon, Trash2 } from "lucide-react";
 
 export default function UsersPage() {
   const [users, setUsers] = useState([]);
@@ -8,7 +8,7 @@ export default function UsersPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const fetchUsers = () => {
     setLoading(true);
     API.get(`/admin/users?page=${page}&limit=10`)
       .then((res) => {
@@ -16,7 +16,24 @@ export default function UsersPage() {
         setTotalPages(res.data.pages);
       })
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchUsers();
   }, [page]);
+
+const handleDelete = async (user) => {
+  if (!confirm(`Are you sure you want to delete user "${user.name}"?`)) return;
+
+  try {
+    const res = await API.delete(`/admin/users/${user.id}`);
+    alert(res.data.msg); // Show success message with user name
+    fetchUsers(); // Refresh table
+  } catch (err) {
+    console.error(err);
+    alert(err.response?.data?.msg || "Failed to delete user");
+  }
+};
 
   return (
     <div className="space-y-6">
@@ -41,13 +58,14 @@ export default function UsersPage() {
                 <th className="p-5 text-gray-400 font-medium text-sm uppercase tracking-wider">Email</th>
                 <th className="p-5 text-gray-400 font-medium text-sm uppercase tracking-wider">Role</th>
                 <th className="p-5 text-gray-400 font-medium text-sm uppercase tracking-wider text-right">Status</th>
+                <th className="p-5 text-gray-400 font-medium text-sm uppercase tracking-wider text-right">Actions</th>
               </tr>
             </thead>
 
             <tbody className="divide-y divide-white/[0.05]">
               {loading ? (
                 <tr>
-                  <td colSpan="4" className="p-10 text-center text-gray-500">Loading users...</td>
+                  <td colSpan="5" className="p-10 text-center text-gray-500">Loading users...</td>
                 </tr>
               ) : (
                 users.map((u) => (
@@ -78,6 +96,14 @@ export default function UsersPage() {
                       <span className="px-3 py-1 bg-emerald-500/10 text-emerald-400 text-[10px] font-black uppercase rounded-full border border-emerald-500/20">
                         Active
                       </span>
+                    </td>
+                    <td className="p-5 text-right">
+                      <button
+                    onClick={() => handleDelete(u)}
+                    className="p-2 bg-red-500/20 text-red-400 rounded-xl hover:bg-red-500/30 transition-all"
+                  >
+                    <Trash2 size={16} />
+                  </button>
                     </td>
                   </tr>
                 ))

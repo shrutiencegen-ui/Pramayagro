@@ -134,7 +134,8 @@ export default function AddProduct({ onProductAdded }) {
                 <Input label="Product Name" name="name" value={form.name} onChange={handleChange} error={errors.name} className="sm:col-span-2" />
                 <Input label="Price (₹)" name="price" type="number" value={form.price} onChange={handleChange} error={errors.price} />
                 <Input label="Stock" name="stock" type="number" value={form.stock} onChange={handleChange} />
-                
+                <Input label="Description" className="sm:col-span-2" value={form.description} icon={<AlignLeft size={16} />} />   
+                 
               </div>
             </Card>
 

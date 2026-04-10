@@ -1,6 +1,6 @@
 "use client";
 
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Leaf, Globe, User, Droplet, Sparkles, ArrowRight } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, EffectFade, Pagination } from "swiper/modules";
@@ -12,12 +12,13 @@ import "swiper/css/pagination";
 import { useState, useEffect } from "react";
 import { useTheme } from "../context/ThemeContext";
 
+
 import home1 from "../assets/home1.png";
 
 export default function Home() {
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const { theme } = useTheme();
-
+ const navigate = useNavigate();
   useEffect(() => {
     const fetchFeaturedProducts = async () => {
       try {
@@ -206,33 +207,44 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 md:gap-10">
-            {featuredProducts.map((product) => (
-              <div key={product.id} className={`group relative p-5 rounded-[2.5rem] overflow-hidden border transition-all duration-500 shadow-xl hover:-translate-y-3 hover:shadow-green-500/20
-                ${theme === "dark" ? "bg-zinc-950 border-white/10" : "bg-white border-gray-200"}`}>
-                <div className="h-60 rounded-[2rem] overflow-hidden relative mb-6">
-                  <img
-                    src={product.image || "https://via.placeholder.com/300"}
-                    alt={product.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                  />
-                  <div className="absolute inset-0 bg-black/5 group-hover:bg-transparent transition-colors" />
-                </div>
+            
+  {featuredProducts.map((product) => (
+    <div key={product.id} className={`group relative p-5 rounded-[2.5rem] overflow-hidden border transition-all duration-500 shadow-xl hover:-translate-y-3 hover:shadow-green-500/20
+      ${theme === "dark" ? "bg-zinc-950 border-white/10" : "bg-white border-gray-200"}`}>
+      
+      {/* 1. Image Section */}
+      <div className="h-60 rounded-[2rem] overflow-hidden relative mb-6">
+        <img
+          src={product.image || "https://via.placeholder.com/600"}
+          alt={product.name}
+          className="w-full h-full object-contain p-6 transition-transform duration-700 group-hover:scale-110 cursor-pointer relative z-10"
+          onClick={() => navigate(`/products/${product.id}`)}
+        />
+        {/* pointer-events-none मुळे हा div क्लिक अडवणार नाही */}
+        <div className="absolute inset-0 bg-black/5 group-hover:bg-transparent transition-colors pointer-events-none" />
+      </div>
 
-                <div className="px-3 pb-3">
-                  <h3 className={`font-extrabold text-lg md:text-xl mb-2 transition-colors
-                    ${theme === "dark" ? "text-white group-hover:text-green-500" : "text-gray-800 group-hover:text-green-500"}`}>
-                    {product.name}
-                  </h3>
-                  <div className="flex justify-between items-end mt-4">
-                    <span className={`text-3xl font-black transition-colors
-                      ${theme === "dark" ? "text-green-400" : "text-green-600"}`}>
-                      ₹{product.price}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+      <div className="px-3 pb-3">
+        {/* 2. Product Name (Clickable) */}
+        <h3 
+          onClick={() => navigate(`/products/${product.id}`)}
+          className={`font-extrabold text-lg md:text-xl mb-2 transition-colors cursor-pointer hover:text-green-500
+            ${theme === "dark" ? "text-white" : "text-gray-800"}`}
+        >
+          {product.name}
+        </h3>
+        
+        <div className="flex justify-between items-end mt-4">
+          <span className={`text-3xl font-black transition-colors
+            ${theme === "dark" ? "text-green-400" : "text-green-600"}`}>
+            ₹{product.price}
+          </span>
+        </div>
+      </div>
+    </div>
+  ))}
+</div>
+          
 
         </div>
       </section>

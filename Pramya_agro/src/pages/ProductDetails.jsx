@@ -91,22 +91,25 @@ export default function ProductDetail() {
 
         {/* Right: Product Details */}
         <div className="md:w-1/2 flex flex-col gap-4">
+
           {/* Product Name & Category */}
-          <h1 className="text-4xl font-extrabold">{product.name}</h1>
-          <p className="text-sm font-semibold text-emerald-500 uppercase tracking-wider">{product.category}</p>
+          <h1 className="text-4xl font-extrabold tracking-tight">{product.name}</h1>
+          <p className={`text-sm font-semibold uppercase tracking-wide ${theme === "dark" ? "text-emerald-400" : "text-emerald-600"}`}>{product.category}</p>
 
           {/* Normal Description */}
           {product.description && (
-            <p className="text-sm text-gray-400 mt-2 leading-relaxed">{product.description}</p>
+            <p className={`text-sm mt-2 leading-relaxed ${theme === "dark" ? "text-gray-300" : "text-gray-700"}`}>
+              {product.description}
+            </p>
           )}
 
           {/* Description Sections */}
           {sections.length > 0 && (
-            <div className="mt-4 flex flex-col gap-3">
+            <div className="mt-6 flex flex-col gap-4">
               {sections.map((sec, idx) => (
-                <div key={idx} className="p-3 border rounded-lg bg-white/5">
-                  <h3 className="font-semibold">{sec.title}</h3>
-                  <p className="text-sm text-gray-300 mt-1">{sec.content}</p>
+                <div key={idx} className={`p-4 border rounded-xl ${theme === "dark" ? "bg-white/5 border-gray-700" : "bg-white/10 border-gray-300"}`}>
+                  <h3 className="font-semibold text-lg">{sec.title}</h3>
+                  <p className={`text-sm mt-1 ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>{sec.content}</p>
                 </div>
               ))}
             </div>
@@ -116,8 +119,8 @@ export default function ProductDetail() {
           <p className="text-3xl font-extrabold text-emerald-500 mt-4">₹{product.price}</p>
 
           {/* Quantity + Add to Cart */}
-          <div className="flex items-center gap-4 mt-2">
-            <div className="flex items-center border rounded-lg overflow-hidden">
+          <div className="flex items-center gap-4 mt-4">
+            <div className={`flex items-center border rounded-lg overflow-hidden ${theme === "dark" ? "border-gray-600" : "border-gray-300"}`}>
               <button onClick={decrement} className="px-3 py-2 hover:bg-emerald-500 hover:text-white transition">-</button>
               <span className="px-4 py-2">{quantity}</span>
               <button onClick={increment} className="px-3 py-2 hover:bg-emerald-500 hover:text-white transition">+</button>
@@ -141,11 +144,13 @@ export default function ProductDetail() {
               <div
                 key={prod.id}
                 onClick={() => navigate(`/products/${prod.id}`)}
-                className="group relative flex flex-col h-full rounded-2xl overflow-hidden shadow-md transition-all duration-500 hover:shadow-2xl hover:-translate-y-1 cursor-pointer"
+                className={`group relative flex flex-col h-full rounded-2xl overflow-hidden shadow-md transition-all duration-500 hover:shadow-2xl hover:-translate-y-1 cursor-pointer ${theme === "dark" ? "bg-gray-900" : "bg-white"}`}
               >
                 <div className="aspect-[4/3] overflow-hidden relative bg-gradient-to-br from-emerald-500/10 to-transparent">
                   <img src={prod.image || "https://via.placeholder.com/600"} alt={prod.name} className="w-full h-full object-contain p-6 transition-transform duration-700 group-hover:scale-110" />
-                  <div className="absolute top-4 left-4 px-3 py-1 rounded-full bg-emerald-500/20 backdrop-blur-md border border-emerald-500/30 text-[9px] font-bold uppercase tracking-widest text-emerald-400">{prod.category}</div>
+                  <div className="absolute top-4 left-4 px-3 py-1 rounded-full bg-emerald-500/20 backdrop-blur-md border border-emerald-500/30 text-[9px] font-bold uppercase tracking-widest text-emerald-400">
+                    {prod.category}
+                  </div>
                 </div>
                 <div className="p-6 flex flex-col flex-grow">
                   <h3 className="text-lg font-semibold line-clamp-2">{prod.name}</h3>

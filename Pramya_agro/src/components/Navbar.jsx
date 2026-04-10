@@ -61,25 +61,27 @@ export default function Navbar() {
     navigate("/");
   };
 
-  // Debounced search
-  useEffect(() => {
-    if (!query.trim()) {
+// Debounced search
+useEffect(() => {
+  if (!query.trim()) {
+    setResults([]);
+    return;
+  }
+  const timeout = setTimeout(async () => {
+    setLoading(true);
+    try {
+      // इथे /products/search ऐवजी /global-search वापरा
+      const res = await API.get(`/global-search?q=${query}`); 
+      setResults(res.data);
+    } catch (err) {
+      console.error("Search Error:", err);
       setResults([]);
-      return;
+    } finally {
+      setLoading(false);
     }
-    const timeout = setTimeout(async () => {
-      setLoading(true);
-      try {
-        const res = await API.get(`/api/products/search?q=${query}`);
-        setResults(res.data);
-      } catch {
-        setResults([]);
-      } finally {
-        setLoading(false);
-      }
-    }, 400);
-    return () => clearTimeout(timeout);
-  }, [query]);
+  }, 400);
+  return () => clearTimeout(timeout);
+}, [query]);
 
   return (
     <nav
@@ -117,14 +119,21 @@ export default function Navbar() {
                 {loading && <div className="p-2 text-sm text-gray-500 dark:text-gray-400">Searching...</div>}
                 {!loading && results.length === 0 && <div className="p-2 text-sm text-gray-500 dark:text-gray-400">No results found</div>}
                 {results.map((item) => (
-                  <Link
-                    key={item.id}
-                    to={`/products/${item.id}`}
-                    className="block px-4 py-2 text-sm text-gray-900 dark:text-gray-100 hover:bg-emerald-50 dark:hover:bg-emerald-900/40"
-                  >
-                    {item.name}
-                  </Link>
-                ))}
+  <Link
+    key={item.id}
+    to={item.link} 
+    onClick={() => {
+      setQuery(""); 
+      setResults([]);
+    }}
+    className="block px-4 py-2 text-sm text-gray-900 dark:text-gray-100 hover:bg-emerald-50 dark:hover:bg-emerald-900/40 border-b border-gray-50 dark:border-gray-800"
+  >
+    <div className="flex justify-between items-center">
+      <span>{item.name}</span>
+      <span className="text-[10px] text-emerald-500 font-bold uppercase">{item.type}</span>
+    </div>
+  </Link>
+))}
               </div>
             )}
           </div>
@@ -216,11 +225,20 @@ export default function Navbar() {
                 <div className="absolute top-full left-0 w-full bg-white dark:bg-[#111314] border border-gray-200 dark:border-gray-700 rounded-lg mt-2 shadow-lg z-50">
                   {loading && <div className="p-2 text-sm text-gray-500 dark:text-gray-400">Searching...</div>}
                   {!loading && results.length === 0 && <div className="p-2 text-sm text-gray-500 dark:text-gray-400">No results found</div>}
-                  {results.map((item) => (
-                    <Link key={item.id} to={`/products/${item.id}`} onClick={() => setMobileOpen(false)} className="block px-4 py-2 text-sm text-gray-900 dark:text-gray-100 hover:bg-emerald-50 dark:hover:bg-emerald-900/40">
-                      {item.name}
-                    </Link>
-                  ))}
+                {results.map((item) => (
+  <Link
+    key={item.id}
+    to={item.link} // आता बॅकएंडवरून येणारा डायनॅमिक लिंक वापरा
+    onClick={() => { setQuery(""); setResults([]); }} // क्लिक केल्यावर सर्च बंद करा
+    className="flex items-center justify-between px-4 py-3 text-sm text-gray-900 dark:text-gray-100 hover:bg-emerald-50 dark:hover:bg-emerald-900/40 border-b border-gray-100 dark:border-gray-800 last:border-0"
+  >
+    <div className="flex flex-col">
+      <span className="font-medium">{item.name}</span>
+      <span className="text-[10px] uppercase text-gray-400">{item.type}</span>
+    </div>
+    <div className="text-emerald-500 text-xs">View →</div>
+  </Link>
+))}
                 </div>
               )}
             </div>

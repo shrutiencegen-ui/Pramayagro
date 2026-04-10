@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { Eye, EyeOff } from "lucide-react"; // <-- eye icons
 import API from "../services/api";
 import { useTheme } from "../context/ThemeContext";
 
@@ -17,35 +18,34 @@ export default function Register() {
 
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false); // <-- password toggle
 
-  const validate = () => {
-    let newErrors = {};
+ const validate = () => {
+  let newErrors = {};
 
-    if (!form.name.trim()) {
-      newErrors.name = "Name is required";
-    } else if (form.name.length < 3) {
-      newErrors.name = "Name must be at least 3 characters";
-    }
+  if (!form.name.trim()) {
+    newErrors.name = "Name is required";
+  } else if (form.name.length < 3) {
+    newErrors.name = "Name must be at least 3 characters";
+  }
 
-    if (!form.email.trim()) {
-      newErrors.email = "Email is required";
-    } else if (!/^\S+@\S+\.\S+$/.test(form.email)) {
-      newErrors.email = "Invalid email format";
-    }
+  if (!form.email.trim()) {
+    newErrors.email = "Email is required";
+  } else if (!/^\S+@\S+\.\S+$/.test(form.email)) {
+    newErrors.email = "Invalid email format";
+  }
 
-    if (!form.password) {
-      newErrors.password = "Password is required";
-    } else if (!/^[a-zA-Z0-9]+$/.test(form.password)) {
-      newErrors.password = "Password must be alphanumeric";
-    } else if (form.password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
-    } else if (form.password.length > 12) {
-      newErrors.password = "Password cannot exceed 12 characters";
-    }
+// Strict alphanumeric: at least one letter and one number
+if (!form.password) {
+  newErrors.password = "Password is required";
+} else if (!/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,12}$/.test(form.password)) {
+  newErrors.password =
+    "Password must be 6-12 characters, contain letters and numbers only, with at least one letter and one number";
+}
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+  setErrors(newErrors);
+  return Object.keys(newErrors).length === 0;
+};
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -54,11 +54,9 @@ export default function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!validate()) return;
 
     setLoading(true);
-
     try {
       await API.post("/register", form);
       navigate("/login");
@@ -137,9 +135,9 @@ export default function Register() {
         </div>
 
         {/* PASSWORD */}
-        <div>
+        <div className="relative">
           <input
-            type="password"
+            type={showPassword ? "text" : "password"}
             name="password"
             placeholder="Password"
             value={form.password}
@@ -150,6 +148,13 @@ export default function Register() {
                 : "bg-gray-100 border border-gray-300 text-black placeholder:text-gray-500 focus:border-emerald-500"
               }`}
           />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute top-3 right-3 text-gray-400 hover:text-emerald-500"
+          >
+            {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
+          </button>
           {errors.password && (
             <p className="text-red-500 text-xs mt-1">{errors.password}</p>
           )}

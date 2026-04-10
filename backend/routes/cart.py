@@ -36,21 +36,31 @@ def add_to_cart():
     return jsonify({"msg": f"{quantity}kg added to cart"}), 200
 
 # ---------------- Get Cart ----------------
+# ---------------- Get Cart (FIXED) ----------------
 @cart_bp.route("", methods=["GET"])
 @jwt_required()
 def get_cart():
-
     identity = get_jwt_identity()
-    user_id = get_jwt_identity()
+    user_id = identity.get("id") if isinstance(identity, dict) else identity
     items = CartItem.query.filter_by(user_id=user_id).all()
-    cart_data = [{
-        "id": item.id,
-        "productId": item.product.id,
-        "name": item.product.name,
-        "price": item.product.price,
-        "image": f"http://localhost:5000/static/uploads/{item.product.image}" if item.product.image else "http://localhost:5000/static/uploads/default.jpg",
-        "quantity": item.quantity
-    } for item in items]
+
+    cart_data = []
+    for item in items:
+       
+        product = item.product 
+       
+        image_path = product.image
+        
+        cart_data.append({
+            "id": item.id,
+            "productId": product.id,
+            "name": product.name,
+            "description": product.description,
+            "price": product.price,
+            "image": image_path, 
+            "quantity": item.quantity
+        })
+    
     return jsonify(cart_data)
 
 

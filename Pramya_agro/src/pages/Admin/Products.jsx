@@ -1,12 +1,6 @@
 import { useEffect, useState } from "react";
 import API from "../../services/api";
-import { 
-  Trash2, 
-  Edit3, 
-  Search, 
-  AlertCircle,
-  X
-} from "lucide-react";
+import { Trash2, Edit3, AlertCircle, X } from "lucide-react";
 
 export default function Products() {
 
@@ -15,15 +9,22 @@ export default function Products() {
   const [search, setSearch] = useState("");
 
   const [editingProduct, setEditingProduct] = useState(null);
+
   const [editForm, setEditForm] = useState({
     name: "",
     description: "",
+    description_sections: [
+      { title: "Composition", content: "" },
+      { title: "Benefits", content: "" },
+      { title: "Dosage", content: "" },
+    ],
     price: "",
-    stock: ""
+    stock: "",
+    category: ""
   });
 
-  const [editImageFile, setEditImageFile] = useState(null);
-  const [previewImage, setPreviewImage] = useState("");
+  const [previewImage, setPreviewImage] = useState(null); // ✅ FIX
+  const [editImageFile, setEditImageFile] = useState(null); // ✅ FIX
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -34,60 +35,77 @@ export default function Products() {
     setLoading(true);
     API.get("/admin/products")
       .then((res) => setProducts(res.data))
-      .catch((err) => console.error(err))
+      .catch(console.error)
       .finally(() => setLoading(false));
-      console.log("BASE URL:", API.defaults.baseURL);
   };
 
-  // ✅ DELETE
+  // DELETE
   const deleteProduct = async (id) => {
     if (!confirm("Delete this product?")) return;
 
     try {
       await API.delete(`/admin/products/${id}`);
       setProducts(products.filter((p) => p.id !== id));
-    } catch (err) {
-      console.error(err);
+    } catch {
       alert("Delete failed");
     }
   };
 
-  // ✅ START EDIT
-  const startEditing = (product) => {
-    setEditingProduct(product);
+  // START EDIT
+  const startEditing = (p) => {
+
+    let sections = p.description_sections;
+
+    // ✅ HANDLE STRING DATA
+    if (typeof sections === "string") {
+      try {
+        sections = JSON.parse(sections);
+      } catch {
+        sections = [];
+      }
+    }
+
+    setEditingProduct(p);
 
     setEditForm({
-      name: product.name,
-      description: product.description,
-      price: product.price,
-      stock: product.stock
+      name: p.name || "",
+      description: p.description || "",
+      description_sections: sections?.length ? sections : [
+        { title: "Composition", content: "" },
+        { title: "Benefits", content: "" },
+        { title: "Dosage", content: "" },
+      ],
+      price: p.price || "",
+      stock: p.stock || "",
+      category: p.category || ""
     });
 
-    // cache fix
-    setPreviewImage(`${product.image}?t=${Date.now()}`);
-  };
-
-  const cancelEditing = () => {
-    setEditingProduct(null);
+    // ✅ IMAGE FIX
+    setPreviewImage(p.image ? `${p.image}?t=${Date.now()}` : null);
     setEditImageFile(null);
   };
 
-  const handleEditChange = (e) => {
+  const handleChange = (e) => {
     const { name, value } = e.target;
     setEditForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  // ✅ IMAGE CHANGE
+  const handleSectionChange = (i, value) => {
+    const updated = [...editForm.description_sections];
+    updated[i].content = value;
+    setEditForm({ ...editForm, description_sections: updated });
+  };
+
+  // ✅ IMAGE CHANGE FIX
   const handleImageChange = (e) => {
     const file = e.target.files[0];
-
     if (file) {
       setEditImageFile(file);
       setPreviewImage(URL.createObjectURL(file));
     }
   };
 
-  // ✅ SAVE EDIT (FINAL FIXED)
+  // SAVE
   const saveEdit = async () => {
     try {
       setSaving(true);
@@ -98,12 +116,16 @@ export default function Products() {
       formData.append("price", editForm.price);
       formData.append("stock", editForm.stock);
       formData.append("category", editForm.category);
+      formData.append(
+        "description_sections",
+        JSON.stringify(editForm.description_sections)
+      );
 
+      // ✅ IMAGE SEND
       if (editImageFile) {
         formData.append("image", editImageFile);
       }
 
-      // ❌ DO NOT SET HEADERS
       await API.put(`/admin/products/${editingProduct.id}`, formData);
 
       await fetchProducts();
@@ -117,8 +139,8 @@ export default function Products() {
     }
   };
 
-  const filteredProducts = products.filter(p =>
-    p.name.toLowerCase().includes(search.toLowerCase())
+  const filteredProducts = products.filter((p) =>
+    p.name?.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -126,10 +148,9 @@ export default function Products() {
 
       {/* HEADER */}
       <div className="flex justify-between items-center">
-        <h1 className="text-4xl font-bold text-white">Inventory</h1>
+        <h1 className="text-3xl text-white font-bold">Products</h1>
 
         <input
-          type="text"
           placeholder="Search..."
           className="bg-gray-800 text-white px-4 py-2 rounded-xl"
           value={search}
@@ -138,176 +159,248 @@ export default function Products() {
       </div>
 
       {/* TABLE */}
-      <div className="bg-gray-900 rounded-3xl overflow-hidden shadow-xl">
-        <table className="w-full">
-          <thead className="bg-gray-800 text-gray-400 text-sm">
+      <div className="bg-gray-900 rounded-2xl overflow-hidden">
+        <table className="w-full text-sm">
+          <thead className="bg-gray-800 text-gray-400">
             <tr>
-              <th className="p-5">Product</th>
+              <th className="p-4">Image</th>
+              <th>Name</th>
+              <th>Description</th>
+              <th>Sections</th>
               <th>Price</th>
               <th>Stock</th>
-              <th className="text-right pr-6">Actions</th>
+              <th></th>
             </tr>
           </thead>
 
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan="4" className="p-10 text-center text-gray-500">
+                <td colSpan="7" className="text-center p-6 text-gray-500">
                   Loading...
                 </td>
               </tr>
-            ) : filteredProducts.length === 0 ? (
-              <tr>
-                <td colSpan="4" className="p-10 text-center text-gray-500">
-                  <AlertCircle className="mx-auto mb-2 opacity-20" size={40}/>
-                  No products found
+            ) : filteredProducts.map((p) => (
+              <tr key={p.id} className="border-t border-white/5 hover:bg-white/5">
+
+                {/* IMAGE */}
+                <td className="p-4">
+                  {p.image ? (
+                    <img
+                      src={`${p.image}?t=${Date.now()}`}
+                      className="w-14 h-14 object-contain rounded-xl bg-white/5 p-1"
+                    />
+                  ) : (
+                    <div className="w-14 h-14 bg-gray-800 rounded-xl flex items-center justify-center">
+                      <AlertCircle className="text-gray-500" />
+                    </div>
+                  )}
                 </td>
+
+                <td className="text-white font-semibold">{p.name}</td>
+
+                <td className="text-gray-400 max-w-[200px]">
+                  {p.description ? p.description.slice(0, 60) + "..." : "-"}
+                </td>
+
+                <td className="text-gray-400 text-xs">
+                  {p.description_sections?.map((sec, i) => (
+                    <div key={i}>
+                      <span className="text-white">{sec.title}:</span>{" "}
+                      {sec.content.slice(0, 25)}...
+                    </div>
+                  ))}
+                </td>
+
+                <td className="text-white">₹{p.price}</td>
+                <td className="text-white">{p.stock}</td>
+
+                <td className="text-right pr-4 space-x-2">
+                  <button onClick={() => startEditing(p)}>
+                    <Edit3 className="inline text-gray-400 hover:text-white"/>
+                  </button>
+                  <button onClick={() => deleteProduct(p.id)}>
+                    <Trash2 className="inline text-gray-400 hover:text-red-400"/>
+                  </button>
+                </td>
+
               </tr>
-            ) : (
-              filteredProducts.map((p) => (
-               // Inside the table row <tr>
-<tr key={p.id} className="border-t border-white/5 hover:bg-white/5">
-
-  <td className="p-5 flex items-center gap-4">
-    <img
-      src={`${p.image}?t=${Date.now()}`}
-      className="w-14 h-14 object-contain rounded-xl"
-    />
-    <div>
-      <p className="text-white font-bold">{p.name}</p>
-      <p className="text-xs text-gray-400">
-        {/* Show category and short description */}
-        <span className="mr-2">Category: {p.category}</span>
-        {p.description.length > 50
-          ? p.description.slice(0, 50) + "..."
-          : p.description
-        }
-      </p>
-    </div>
-  </td>
-
-  {/* Price: always required */}
-  <td className="text-white font-semibold">₹{p.price}</td>
-
-  {/* Stock: optional, show 0 if not set */}
-  <td className={`${!p.stock || p.stock < 10 ? "text-red-400" : "text-green-400"}`}>
-    {p.stock || 0}
-  </td>
-
-  <td className="text-right pr-6 space-x-2">
-    <button onClick={() => startEditing(p)}>
-      <Edit3 className="inline text-gray-400 hover:text-white"/>
-    </button>
-    <button onClick={() => deleteProduct(p.id)}>
-      <Trash2 className="inline text-gray-400 hover:text-red-400"/>
-    </button>
-  </td>
-
-</tr>
-              ))
-            )}
+            ))}
           </tbody>
         </table>
       </div>
 
       {/* EDIT MODAL */}
       {editingProduct && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center backdrop-blur z-50">
+  <div className="fixed inset-0 bg-black/70 backdrop-blur flex justify-center items-center z-50">
 
-          <div className="bg-gradient-to-br from-gray-900 to-gray-800 p-8 rounded-3xl w-[420px] shadow-2xl border border-white/10 relative">
+    <div className="bg-gradient-to-br from-gray-900 to-gray-800 w-[1000px] max-h-[90vh] overflow-y-auto rounded-3xl shadow-2xl border border-white/10 p-8 relative">
 
-            <button 
-              onClick={cancelEditing}
-              className="absolute top-4 right-4 text-gray-400 hover:text-white"
-            >
-              <X />
-            </button>
+      {/* CLOSE */}
+      <button
+        onClick={() => setEditingProduct(null)}
+        className="absolute top-5 right-5 text-gray-400 hover:text-white"
+      >
+        <X size={22} />
+      </button>
 
-            <h2 className="text-white text-2xl font-bold mb-5">
-              Edit Product
-            </h2>
+      <h2 className="text-3xl font-bold text-white mb-6">
+        Edit Product
+      </h2>
 
-            {/* IMAGE */}
-            <div className="flex flex-col items-center mb-5">
-              <img
-                src={previewImage}
-                className="w-28 h-28 rounded-xl object-cover"
+      <div className="grid grid-cols-3 gap-8">
+
+        {/* LEFT SIDE */}
+        <div className="col-span-2 space-y-6">
+
+          {/* BASIC INFO */}
+          <div className="bg-white/[0.03] p-6 rounded-2xl border border-white/10">
+            <h3 className="text-white font-semibold mb-4">Basic Info</h3>
+
+            <input
+              name="name"
+              value={editForm.name}
+              onChange={handleChange}
+              placeholder="Product Name"
+              className="w-full p-3 mb-4 rounded-xl bg-gray-800 text-white"
+            />
+
+            <textarea
+              name="description"
+              value={editForm.description}
+              onChange={handleChange}
+              placeholder="Full Description"
+              rows={4}
+              className="w-full p-3 rounded-xl bg-gray-800 text-white"
+            />
+          </div>
+
+          {/* DESCRIPTION SECTIONS */}
+          <div className="bg-white/[0.03] p-6 rounded-2xl border border-white/10">
+            <h3 className="text-white font-semibold mb-4">
+              Description Sections
+            </h3>
+
+            <div className="space-y-4">
+              {editForm.description_sections.map((sec, i) => (
+                <div key={i} className="bg-black/30 p-4 rounded-xl">
+                  <p className="text-sm text-gray-400 mb-2">
+                    {sec.title}
+                  </p>
+                  <textarea
+                    rows={4}
+                    value={sec.content}
+                    onChange={(e) =>
+                      handleSectionChange(i, e.target.value)
+                    }
+                    className="w-full p-3 bg-gray-800 text-white rounded-xl"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* PRICING */}
+          <div className="bg-white/[0.03] p-6 rounded-2xl border border-white/10">
+            <h3 className="text-white font-semibold mb-4">Pricing & Stock</h3>
+
+            <div className="grid grid-cols-2 gap-4">
+              <input
+                name="price"
+                value={editForm.price}
+                onChange={handleChange}
+                placeholder="Price"
+                className="p-3 bg-gray-800 text-white rounded-xl"
               />
 
-              <label className="text-emerald-400 mt-2 cursor-pointer">
-                Change Image
-                <input type="file" hidden onChange={handleImageChange}/>
-              </label>
+              <input
+                name="stock"
+                value={editForm.stock}
+                onChange={handleChange}
+                placeholder="Stock"
+                className="p-3 bg-gray-800 text-white rounded-xl"
+              />
             </div>
-
-            {/* FORM */}
-            <div className="space-y-3">
-
-  {/* NAME */}
-  <input
-    name="name"
-    value={editForm.name || ""}
-    onChange={handleEditChange}
-    placeholder="Enter product name"
-    className="w-full p-3 rounded-xl bg-gray-800 text-white placeholder-gray-400"
-  />
-
-  {/* DESCRIPTION */}
-  <textarea
-    name="description"
-    value={editForm.description || ""}
-    onChange={handleEditChange}
-    placeholder="Enter product description"
-    className="w-full p-3 rounded-xl bg-gray-800 text-white placeholder-gray-400"
-  />
-
-  {/* CATEGORY */}
-  <select
-    name="category"
-    value={editForm.category || ""}
-    onChange={handleEditChange}
-    className="w-full p-3 rounded-xl bg-gray-800 text-white"
-  >
-    <option value="">Select Category</option>
-    <option value="Adjuvant">Adjuvant</option>
-    <option value="Micronutrient">Micronutrient</option>
-    <option value="Fertilizer">Fertilizer</option>
-    <option value="Bio Stimulant">Bio Stimulant</option>
-  </select>
-
-  {/* PRICE + STOCK */}
-  <div className="flex gap-3">
-    <input
-      name="price"
-      value={editForm.price || ""}
-      onChange={handleEditChange}
-      placeholder="Price"
-      className="w-1/2 p-3 rounded-xl bg-gray-800 text-white placeholder-gray-400"
-    />
-
-    <input
-      name="stock"
-      value={editForm.stock || ""}
-      onChange={handleEditChange}
-      placeholder="Stock"
-      className="w-1/2 p-3 rounded-xl bg-gray-800 text-white placeholder-gray-400"
-    />
-  </div>
-
-  {/* BUTTON */}
-  <button
-    onClick={saveEdit}
-    disabled={saving}
-    className="w-full mt-4 bg-emerald-500 p-3 rounded-xl text-white font-semibold hover:bg-emerald-600 disabled:opacity-50"
-  >
-    {saving ? "Saving..." : "Save Changes"}
-  </button>
-
-</div>
-
           </div>
+
         </div>
-      )}
+
+        {/* RIGHT SIDE */}
+        <div className="space-y-6">
+
+          {/* IMAGE */}
+          <div className="bg-white/[0.03] p-6 rounded-2xl border border-white/10">
+            <h3 className="text-white font-semibold mb-4">
+              Product Image
+            </h3>
+
+            <div className="border-2 border-dashed border-white/10 rounded-2xl h-[220px] flex items-center justify-center relative group">
+
+              {previewImage ? (
+                <>
+                  <img
+                    src={previewImage}
+                    className="h-full object-contain"
+                  />
+
+                  <label className="absolute bottom-2 bg-black/60 px-3 py-1 rounded-lg text-sm cursor-pointer">
+                    Change
+                    <input
+                      type="file"
+                      hidden
+                      onChange={handleImageChange}
+                    />
+                  </label>
+                </>
+              ) : (
+                <label className="cursor-pointer text-center">
+                  <p className="text-gray-400 text-sm">
+                    Upload Image
+                  </p>
+                  <input
+                    type="file"
+                    hidden
+                    onChange={handleImageChange}
+                  />
+                </label>
+              )}
+
+            </div>
+          </div>
+
+          {/* CATEGORY */}
+          <div className="bg-white/[0.03] p-6 rounded-2xl border border-white/10">
+            <h3 className="text-white font-semibold mb-4">Category</h3>
+
+            <select
+              name="category"
+              value={editForm.category}
+              onChange={handleChange}
+              className="w-full p-3 bg-gray-800 text-white rounded-xl"
+            >
+              <option>Adjuvant</option>
+              <option>Micronutrient</option>
+              <option>Fertilizer</option>
+              <option>Bio Stimulant</option>
+              <option>Plant Growth</option>
+            </select>
+          </div>
+
+        </div>
+      </div>
+
+      {/* SAVE */}
+      <button
+        onClick={saveEdit}
+        disabled={saving}
+        className="mt-8 w-full bg-emerald-500 hover:bg-emerald-600 p-4 rounded-xl text-white font-bold text-lg"
+      >
+        {saving ? "Saving Changes..." : "Save Changes"}
+      </button>
+
+    </div>
+  </div>
+)}
 
     </div>
   );

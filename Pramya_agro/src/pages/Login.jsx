@@ -28,8 +28,8 @@ export default function Login() {
 
     if (!form.password) {
       newErrors.password = "Password is required";
-    } else if (form.password.length < 8 || form.password.length > 12) {
-      newErrors.password = "Password must be 8-12 characters";
+    } else if (form.password.length <= 6 || form.password.length > 12) {
+      newErrors.password = "Password must be 6-12 characters";
     }
 
     setErrors(newErrors);

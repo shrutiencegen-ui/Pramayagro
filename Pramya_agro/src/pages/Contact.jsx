@@ -9,7 +9,7 @@ export default function ContactUs() {
   const contactCards = [
     { icon: <Phone size={24} />, title: "Call Us", info: "+91 7404042121" },
     { icon: <Mail size={24} />, title: "Email", info: "pramayagro@gmail.com" },
-    { icon: <MapPin size={24} />, title: "Location", info: "Talawade, Pune - 411062" },
+    { icon: <MapPin size={24} />, title: "Location", info: "Gate No. 188, Jyotiba Nagar, Near By Pandurang Krupa Hotel, Talawade,Tal- Haveli, Dist-  Pune - 411062" },
   ];
 
   return (

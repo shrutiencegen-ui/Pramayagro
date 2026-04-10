@@ -98,35 +98,40 @@ export default function Home() {
 
       {/* STATS SECTION */}
       <section className="relative z-30 -mt-16 px-4 md:px-10">
-        <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6">
-          {[
-            { label: "Global Reach", value: 24, suffix: "+", icon: <Globe size={24} /> },
-            { label: "Farmers Supported", value: 15000, suffix: "+", icon: <User size={24} /> },
-            { label: "Water Saved", value: 50000, suffix: "L+", icon: <Droplet size={24} /> },
-            { label: "Soil Regenerated", value: 100, suffix: "%", icon: <Leaf size={24} /> },
-          ].map((stat, i) => (
-            <div
-              key={i}
-              className={`group relative p-8 rounded-[2.5rem] shadow-2xl border transition-all hover:-translate-y-3
-              ${theme === "dark"
-                ? "bg-zinc-900/90 border-white/10 hover:shadow-green-500/30"
-                : "bg-white/95 border-slate-100 hover:shadow-green-400/30"
-              } backdrop-blur-2xl`}
-            >
-              <div className="w-14 h-14 flex items-center justify-center text-green-500 bg-green-500/10 rounded-2xl mb-6 group-hover:bg-green-500 group-hover:text-white transition-all">
-                {stat.icon}
-              </div>
-              <h3 className="text-4xl md:text-6xl font-black tracking-tighter">
-                <CountUp end={stat.value} duration={3} suffix={stat.suffix} />
-              </h3>
-              <p className={`text-xs font-bold uppercase tracking-widest mt-2
-                ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>
-                {stat.label}
-              </p>
-            </div>
-          ))}
+  <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+    {[
+      { label: "Global Reach", value: 24, suffix: "+", icon: <Globe size={24} /> },
+      { label: "Farmers Supported", value: 15000, suffix: "+", icon: <User size={24} /> },
+      { label: "Water Saved", value: 50000, suffix: "L+", icon: <Droplet size={24} /> },
+      { label: "Soil Regenerated", value: 100, suffix: "%", icon: <Leaf size={24} /> },
+    ].map((stat, i) => (
+      <div
+        key={i}
+        className={`group relative p-4 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem] shadow-2xl border transition-all hover:-translate-y-3
+        ${theme === "dark"
+          ? "bg-zinc-900/90 border-white/10 hover:shadow-green-500/30"
+          : "bg-white/95 border-slate-100 hover:shadow-green-400/30"
+        } backdrop-blur-2xl flex flex-col items-center text-center md:items-start md:text-left`}
+      >
+        {/* Icon: मोबाईलवर थोडा लहान केला आहे */}
+        <div className="w-10 h-10 md:w-14 md:h-14 flex items-center justify-center text-green-500 bg-green-500/10 rounded-xl md:rounded-2xl mb-4 md:mb-6 group-hover:bg-green-500 group-hover:text-white transition-all">
+          {stat.icon}
         </div>
-      </section>
+
+        {/* Value: मोबाईलसाठी text-2xl किंवा 3xl वापरा */}
+        <h3 className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-black tracking-tighter truncate w-full">
+          <CountUp end={stat.value} duration={3} suffix={stat.suffix} />
+        </h3>
+
+        {/* Label: मोबाईलवर वाचायला सोपे जावे म्हणून text-[10px] */}
+        <p className={`text-[10px] md:text-xs font-bold uppercase tracking-widest mt-1 md:mt-2
+          ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>
+          {stat.label}
+        </p>
+      </div>
+    ))}
+  </div>
+</section>
 
       {/* WHY PRAMAY */}
       <section className="py-32 px-6">

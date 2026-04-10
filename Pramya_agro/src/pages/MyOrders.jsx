@@ -151,7 +151,7 @@ export default function MyOrders() {
                 <div className="space-y-3">
                   {order.products.map((item, i) => (
                     <div key={i} className="flex justify-between">
-                      <img src={item.image || "https://via.placeholder.com/50"} alt={item.name} className="w-12 h-12 object-cover rounded-lg" />
+                      <img src={item.image || "https://via.placeholder.com/50"} alt={item.name} className="w-12 h-12 object-contain rounded-lg" />
                       <span>{item.name} x {item.quantity}</span>
                       <span className="text-emerald-500 font-bold">
                         ₹{item.price}

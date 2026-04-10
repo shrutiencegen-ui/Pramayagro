@@ -44,7 +44,7 @@ class Order(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     # relationship to order items
-    items = db.relationship("OrderItem", backref="order", lazy=True)
+    items = db.relationship("OrderItem", backref="order", cascade="all, delete-orphan")
 
 class OrderItem(db.Model):
     id = db.Column(db.Integer, primary_key=True)

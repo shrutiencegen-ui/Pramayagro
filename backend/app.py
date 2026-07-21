@@ -54,6 +54,20 @@ db.init_app(app)
 
 with app.app_context():
     db.create_all()
+def create_first_admin():
+     
+    admin_exists = User.query.filter_by(email="admin@gmail.com").first()
+    if not admin_exists:
+        new_admin = User(
+            name="Admin",
+            email="admin@gmail.com",
+            role="admin"  
+        )
+        new_admin.set_password("admin123") 
+        db.session.add(new_admin)
+        db.session.commit()
+        return "Admin created successfully!"
+    return "Admin already exists."
 
 razorpay_client = razorpay.Client(
     auth=(os.environ.get("RAZORPAY_KEY_ID"), os.environ.get("RAZORPAY_KEY_SECRET"))
@@ -734,20 +748,6 @@ def get_stats():
         "product_stats": product_stats 
     })
 @app.route("/api/create-first-admin")
-def create_first_admin():
-     
-    admin_exists = User.query.filter_by(email="admin@gmail.com").first()
-    if not admin_exists:
-        new_admin = User(
-            name="Admin",
-            email="admin@gmail.com",
-            role="admin"  
-        )
-        new_admin.set_password("admin123") 
-        db.session.add(new_admin)
-        db.session.commit()
-        return "Admin created successfully!"
-    return "Admin already exists."
 
 # Add a job - Admin
 @app.route("/api/admin/careers", methods=["POST"])

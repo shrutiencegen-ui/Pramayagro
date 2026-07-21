@@ -95,7 +95,7 @@ export default function Navbar() {
           <Link to="/" className="flex items-center gap-2 flex-shrink-0" onClick={() => setMobileOpen(false)}>
             <img src="/logo.png" alt="Logo" className="h-9 md:h-11 w-auto" />
             <h1 className={`text-lg md:text-xl font-black tracking-tighter transition-colors text-white`}>
-              PRAMAY<span className="text-emerald-500">AGRO</span>
+             <span className="text-emerald-500">PRAMAY AGRO</span>
             </h1>
           </Link>
 

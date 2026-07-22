@@ -52,8 +52,7 @@ CORS(app, resources={
 
 db.init_app(app)
 
-with app.app_context():
-    db.create_all()
+
 def create_first_admin():
      
     admin_exists = User.query.filter_by(email="admin@gmail.com").first()
@@ -72,6 +71,9 @@ def create_first_admin():
 razorpay_client = razorpay.Client(
     auth=(os.environ.get("RAZORPAY_KEY_ID"), os.environ.get("RAZORPAY_KEY_SECRET"))
 )
+with app.app_context():
+    db.create_all()
+    print(create_first_admin())
 
 
 # ✅ HELPER FUNCTION FOR IMAGE URL (Cloudinary vs Local)
@@ -747,7 +749,7 @@ def get_stats():
         "total_revenue": float(total_revenue),
         "product_stats": product_stats 
     })
-@app.route("/api/create-first-admin")
+
 
 # Add a job - Admin
 @app.route("/api/admin/careers", methods=["POST"])
